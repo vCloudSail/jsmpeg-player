@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "esnext", // 用来指定 ES 版本 ESNext : 最新版
+    "module": "esnext", // 指定要使用模块化的规范 
+    "baseUrl": "./",
+    "moduleResolution": "node",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "importHelpers": true,
+    "skipLibCheck": true, // 跳过.d.ts文件检查
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

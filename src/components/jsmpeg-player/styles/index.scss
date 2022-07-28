@@ -1,0 +1,183 @@
+@import './icon/index.css';
+@import './popover.scss';
+
+.jsmpeg-player {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  background-color: #000;
+  button {
+    background: none;
+    border: none;
+    display: flex;
+    font-size: inherit;
+    line-height: inherit;
+    text-transform: none;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .player-header {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0 10px;
+    background: linear-gradient(#000, transparent);
+    transform: translateY(-100%);
+    transition: 0.48s transform ease-in-out;
+    z-index: 10;
+    &.is-show {
+      transform: translateY(0);
+      .recording-tips {
+        display: inline-flex;
+        transform: translateY(0) !important;
+        // transition: 0.45s display;
+      }
+    }
+    .player-title {
+      color: #fff;
+      float: left;
+    }
+    .recording-tips {
+      height: 40px;
+      font-size: 14px;
+      color: white;
+      float: right;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      transform: translateY(100%);
+      transition: transform 0.28s;
+      .recording-icon {
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 5px;
+        margin-left: 8px;
+        margin-right: 6px;
+        transition: 0.25s background-color ease-in;
+        &.is-hide {
+          background-color: transparent;
+        }
+      }
+    }
+    .close-btn {
+      color: gray;
+      transition: 0.28s color;
+      position: absolute;
+      top: 0;
+      right: 5px;
+      font-size: 18px;
+      &:hover {
+        color: #f56c6c;
+      }
+    }
+  }
+  .player-canvas__wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      // transition: 0.28s transform;
+    }
+    .no-signal-text {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: #000;
+    }
+    .el-loading-mask {
+      background-color: transparent;
+    }
+  }
+  .player-toolbar {
+    width: 100%;
+    height: 45px;
+    line-height: 36px;
+    background: linear-gradient(transparent, #000);
+    padding: 0 8px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transform: translateY(100%);
+    transition: 0.48s transform ease-in-out;
+    z-index: 10;
+    &.is-show {
+      transform: translateY(0);
+    }
+    .toolbar-btn-container {
+      height: 35px;
+      width: 35px;
+      line-height: 1;
+    }
+    .toolbar-btn {
+      color: whitesmoke !important;
+      opacity: 0.8;
+      transition: 0.28s opacity ease-in-out, 0.28s color;
+      &:hover {
+        opacity: 1;
+      }
+      img.icon {
+        object-fit: scale-down;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
+    > .toolbar-btn {
+      max-height: 35px;
+      max-width: 35px;
+      font-size: 24px;
+    }
+    .play-btn {
+      transition: 0.28s color;
+      // &:hover {
+      //   color: #409eff !important;
+      // }
+      // color: #f56c6c !important;
+      // &.is-paused {
+      //   color: #409eff !important;
+      // }
+    }
+    .recording-btn {
+      &.is-recording {
+        color: #f56c6c !important;
+      }
+    }
+    .stop-btn {
+      color: #f56c6c !important;
+    }
+    .progress-bar {
+      flex: 1;
+      padding: 0 10px;
+      .current-time {
+        float: right;
+        cursor: default;
+        color: whitesmoke !important;
+      }
+    }
+  }
+  .overlayers {
+    width: 0;
+    height: 0;
+  }
+}

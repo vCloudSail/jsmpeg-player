@@ -1,0 +1,19 @@
+@import './iconfont.css';
+
+.el-button [class*='icon-'] + span {
+  margin-left: 5px;
+}
+
+[class*='icon-'],
+[class^='icon-'] {
+  font-family: 'jsmpeg' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  vertical-align: baseline;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+}

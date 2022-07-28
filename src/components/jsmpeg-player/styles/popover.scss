@@ -1,0 +1,100 @@
+.jsmpeg-player-popover {
+  $background: rgba(
+    $color: dimgray,
+    $alpha: 0.8
+  );
+
+  border: none !important;
+  padding: 16px 8px;
+  min-width: 0 !important;
+  background-color: $background !important;
+  .popper__arrow {
+    &::after {
+      border-top-color: $background !important;
+      border-radius: 0;
+    }
+  }
+  &.popover-volume {
+    .volume-value {
+      font-size: 12px;
+      text-align: center;
+      color: white;
+    }
+    .el-slider {
+      margin-top: 10px;
+      .el-slider__runway {
+        background: dimgray;
+      }
+      .el-slider__bar {
+        // background: lightgray;
+      }
+      .el-slider__marks-text {
+        color: white !important;
+      }
+    }
+  }
+  &.popover-setting {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    .setting-item {
+      color: whitesmoke;
+      cursor: pointer;
+      padding: 8px 15px;
+      // margin: 0 15px;
+      transition: 0.28s color;
+      height: 34px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      &[highlight]:hover {
+        color: #409eff;
+        // background-color: #409eff;
+      }
+      & + .setting-item {
+        // border-top: 1px solid lightgray;
+      }
+      .label {
+        text-align: right;
+        // flex: 1;
+        width: 80px;
+        // font-weight: 700;
+      }
+      > .input__wrap,
+      > .icon {
+        margin: 0 10px;
+        max-width: 100px;
+      }
+      .input__wrap {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        > * {
+          background-color: transparent;
+          color: whitesmoke;
+        }
+      }
+
+      .el-switch {
+        width: 30px;
+        &.is-checked {
+          .el-switch__core::after {
+            margin-left: -14px !important;
+          }
+        }
+        .el-switch__core {
+          height: 16px;
+          width: 100%;
+          // height: 15px;
+          margin: 0;
+          position: relative;
+          &::after {
+            height: 12px;
+            width: 12px;
+          }
+        }
+      }
+    }
+  }
+}

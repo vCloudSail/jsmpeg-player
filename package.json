@@ -1,0 +1,68 @@
+{
+  "name": "vue-jsmpeg-player",
+  "version": "1.0.0",
+  "description": "基于jsmpeg.js开发的流媒体播放器",
+  "license": "MIT",
+  "main": "dist/jsmpeg-player.umd.min.js",
+  "types": "dist/jsmpeg-player.d.ts",
+  "private": false,
+  "author": "云帆 <cloudsail.studio@outlook.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://gihub.com/cloudsail-studio/jsmpeg-player.git"
+  },
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "dev:full": "npm run simple-server && vue-cli-service serve",
+    "build": "vue-cli-service build --report --target lib --name jsmpeg-player ./src/index.js",
+    "build:demo": "vue-cli-service build --report",
+    "lint": "vue-cli-service lint",
+    "simple-server": "cd simple-server && call start.bat",
+    "clean": "rimraf .eslintcache && rimraf ./package-lock.json && rimraf node_modules",
+    "reinstall": "npm run clean && timeout /t 2 nobreak && npm i",
+    "publish": "npm config set registry https://registry.npmjs.org && npm run build && call npm publish",
+    "taobao": "npm config set registry https://registry.npm.taobao.org"
+  },
+  "dependencies": {
+    "core-js": "3.23.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "babel-plugin-component": "^1.1.1",
+    "core-js": "3.23.0",
+    "element-ui": "2.15.6",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "lint-staged": "^11.1.2",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2",
+    "sass": "1.32.6",
+    "sass-loader": "10.0.3",
+    "vue": "2.7.8",
+    "vue-template-compiler": "2.7.8"
+  },
+  "peerDependencies": {
+    "vue": "^2.6.14",
+    "element-ui": "^2.15.6"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,vue,css}": [
+      "prettier --config .prettierrc.js --write",
+      "git add"
+    ]
+  }
+}
