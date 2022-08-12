@@ -1,5 +1,5 @@
 import Renderer from './renderer'
-import { Base64ToArrayBuffer, saveToLocal, Now } from '../utils'
+import { Base64ToArrayBuffer, download, Now } from '../utils'
 import AudioOutput from './audio-output'
 import Decoder from './decoder'
 import Demuxer from './demuxer'
@@ -355,14 +355,14 @@ export default class Player {
    * @author 刘灿民
    * @param {string} name
    */
-  snapshot(name = 'JSMPeg') {
+  snapshot(name = 'jsmpeg') {
     if (this.canvas) {
       const mime = 'image/png',
         url = this.canvas.toDataURL(mime)
 
-      saveToLocal(
+      download(
         url.replace(mime, 'image/octet-stream'),
-        `${name}_截图_${new Date().toLocaleTimeString()}.png`,
+        `${name}_snapshot_${Date.now()}.png`,
         mime
       )
     }
@@ -388,7 +388,7 @@ export default class Player {
           this.recorder.stream instanceof MediaStream
         ) {
           this.recorder.mediaRecorder.stop()
-          saveToLocal(
+          download(
             this.recorder.chunks,
             `${this.recorder.saveName}.webm`,
             'video/webm;codecs=vp9'
@@ -398,7 +398,7 @@ export default class Player {
           this.recorder.mode === 'ws' &&
           this.recorder.chunks instanceof Array
         ) {
-          saveToLocal(
+          download(
             this.recorder.chunks,
             `${this.recorder.saveName}.ts`,
             'video/MP2T'

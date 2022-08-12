@@ -5,6 +5,8 @@
 *.map
 *.html
 
+dist/*.html
+
 test
 npm-debug.log
 .DS_Store

@@ -1,12 +1,12 @@
 @import './iconfont.css';
 
-.el-button [class*='icon-'] + span {
+/* * [class*='jm-icon-'] + span {
   margin-left: 5px;
-}
+} */
 
-[class*='icon-'],
-[class^='icon-'] {
-  font-family: 'jsmpeg' !important;
+[class*='jm-icon-'],
+[class^='jm-icon-'] {
+  font-family: 'jsmpeg-player' !important;
   speak: none;
   font-style: normal;
   font-weight: normal;

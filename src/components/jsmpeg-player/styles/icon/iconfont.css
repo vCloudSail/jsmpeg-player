@@ -1,46 +1,70 @@
 @font-face {
-  font-family: 'jsmpeg'; /* Project id 2580924 */
-  src: url('iconfont.woff2?t=1658845087369') format('woff2'),
-    url('iconfont.woff?t=1658845087369') format('woff'),
-    url('iconfont.ttf?t=1658845087369') format('truetype');
+  font-family: 'jsmpeg-player'; /* Project id 2580924 */
+  src: url('iconfont.woff2?t=1660312070074') format('woff2'),
+    url('iconfont.woff?t=1660312070074') format('woff'),
+    url('iconfont.ttf?t=1660312070074') format('truetype');
 }
 
-.jsmpeg {
-  font-family: 'jsmpeg' !important;
+.jsmpeg-player {
+  font-family: 'jsmpeg-player' !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-recording:before {
+.jm-icon-close:before {
+  content: '\e661';
+}
+
+.jm-icon-settings:before {
+  content: '\e892';
+}
+
+.jm-icon-video-play:before {
+  content: '\e600';
+}
+
+.jm-icon-more:before {
+  content: '\e601';
+}
+
+.jm-icon-screenshots:before {
+  content: '\e602';
+}
+
+.jm-icon-video-pause:before {
+  content: '\e603';
+}
+
+.jm-icon-recording:before {
   content: '\e663';
 }
 
-.icon-rotate-right:before {
+.jm-icon-rotate-right:before {
   content: '\e698';
 }
 
-.icon-rotate-left:before {
+.jm-icon-rotate-left:before {
   content: '\e699';
 }
 
-.icon-stop:before {
+.jm-icon-stop:before {
   content: '\e611';
 }
 
-.icon-exitfullscreen:before {
+.jm-icon-fullscreen-exit:before {
   content: '\e65d';
 }
 
-.icon-fullscreen:before {
+.jm-icon-fullscreen:before {
   content: '\e65e';
 }
 
-.icon-muted:before {
+.jm-icon-muted:before {
   content: '\e62d';
 }
 
-.icon-volume:before {
+.jm-icon-volume:before {
   content: '\e62e';
 }

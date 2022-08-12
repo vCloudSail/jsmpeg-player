@@ -33,11 +33,7 @@ export function Base64ToArrayBuffer(base64) {
  * @param {string} param.mimeType 文件mime类型
  * @returns
  */
-export function saveToLocal(
-  blob,
-  name = 'JSMpeg_' + Date.now(),
-  mimeType = ''
-) {
+export function download(blob, name = 'JSMpeg_' + Date.now(), mimeType = '') {
   if (!blob) return
 
   const a = document.createElement('a')

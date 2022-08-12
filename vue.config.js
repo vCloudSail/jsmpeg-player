@@ -17,6 +17,7 @@ module.exports = defineConfig({
   runtimeCompiler: process.env.NODE_ENV === 'development',
   devServer: {
     hot: true,
+    host: 'localhost',
     port: 10321,
     open: true
     // https: true,

@@ -15,7 +15,7 @@ rtsp流=>ffmpeg转码=>http server接收=>websocket server转发=>websocket clie
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2a11509af2b64ee08608518017a7bfad.png)
 
 # 安装教程
-本组件使用了element-ui部分组件和icon（后续有空了考虑剔除），要求element-ui>2.15.6，vue>2.6.14
+本组件使用了element-ui部分组件（后续有空了考虑剔除），要求element-ui>2.15.1，vue>2.6.1
 
 ```javascript
 npm i vue-jsmpeg-player -S
@@ -25,20 +25,27 @@ npm i vue-jsmpeg-player -S
 ```javascript
 // main.js
 import Vue from 'vue'
-import JSMpegPlayer from 'vue-jsmpeg-player'
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
 
+import JSMpegPlayer from 'vue-jsmpeg-player';
+import 'vue-jsmpeg-player/dist/jsmpeg-player.css';
+
+Vue.use(ElementUI)
 Vue.use(JSMpegPlayer)
 
 // 或者
 
-import { JsmpegPlayer } from 'vue-jsmpeg-player'
+import { JsmpegPlayer } from 'vue-jsmpeg-player';
+import 'vue-jsmpeg-player/dist/jsmpeg-player.css';
 
 Vue.component(JsmpegPlayer.name, JsmpegPlayer)
 ```
 
 **局部组件**
 ```javascript
-import { JsmpegPlayer } from 'vue-jsmpeg-player'
+import { JsmpegPlayer } from 'vue-jsmpeg-player';
+import 'vue-jsmpeg-player/dist/jsmpeg-player.css';
 
 export default {
   ...
@@ -95,10 +102,11 @@ export default {
 | no-signal-text | string | 无信号时的显示文本
 | options | object| jsmpeg原生选项，直接透传，详见下表
 | closeable| boolean| 是否可关闭（单击关闭按钮，仅抛出事件）
-| in-background | boolean| 是否处于后台，如el-tabs的切换，路由的切换等，支持.sync
+| in-background | boolean| 是否处于后台，如el-tabs的切换，路由的切换等，支持.sync修饰符
 | show-duration| boolean| 是否现实持续播放时间
 | default-mute | boolean| 默认静音
 | with-toolbar | boolean| 是否需要工具栏
+| loading-text | boolean| 加载时的文本，默认为：拼命加载中...
 
 **原生属性：**
 

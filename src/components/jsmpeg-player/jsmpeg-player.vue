@@ -30,7 +30,7 @@
       </div>
       <button
         v-if="showCloseBtn"
-        class="close-btn el-icon-close"
+        class="close-btn jm-icon-close"
         type="button"
         title="关闭"
         @click="$emit('close')"
@@ -40,7 +40,7 @@
       class="player-canvas__wrap"
       ref="canvas-wrap"
       v-loading="loading"
-      element-loading-text="loading..."
+      :element-loading-text="loadingText"
       @mousemove.passive="handleCanvasMouseMove"
       @click="handleCanvasClick"
       @dblclick="toggleFullscreen"
@@ -66,23 +66,23 @@
       <button
         class="toolbar-btn play-btn"
         type="button"
-        :class="paused ? 'el-icon-video-play is-paused' : 'el-icon-video-pause'"
+        :class="paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'"
         :title="paused ? '播放' : '暂停'"
-        @click="handleToolbarBtnClick('play')"
+        @click="handleToolbar('play')"
       ></button>
       <button
-        class="toolbar-btn stop-btn icon-stop"
+        class="toolbar-btn stop-btn jm-icon-stop"
         title="停止"
         type="button"
-        @click="handleToolbarBtnClick('stop')"
+        @click="handleToolbar('stop')"
       ></button>
       <button
         class="toolbar-btn volume-btn"
         type="button"
         title="音量"
         v-popover:popover-volume
-        :class="isMuted ? 'icon-muted' : 'icon-volume'"
-        @click="handleToolbarBtnClick('mute')"
+        :class="isMuted ? 'jm-icon-muted' : 'jm-icon-volume'"
+        @click="handleToolbar('mute')"
       ></button>
       <div class="progress-bar">
         <span
@@ -95,23 +95,23 @@
       <!-- <button class="snapshot-btn"
               title="画中画"
               @click="requesPip">
-        <i class="el-icon-copy-document"></i>
+        <i class="jm-icon-copy-document"></i>
       </button> -->
       <button
-        class="toolbar-btn snapshot-btn el-icon-camera"
+        class="toolbar-btn snapshot-btn jm-icon-screenshots"
         title="截图"
         type="button"
-        @click="handleToolbarBtnClick('snapshot')"
+        @click="handleToolbar('snapshot')"
       ></button>
       <button
-        class="toolbar-btn recording-btn icon-recording"
+        class="toolbar-btn recording-btn jm-icon-recording"
         type="button"
         :class="isRecording ? 'is-recording' : ''"
         :title="isRecording ? '停止录制' : '录制'"
-        @click="handleToolbarBtnClick('recording')"
+        @click="handleToolbar('recording')"
       ></button>
       <button
-        class="toolbar-btn setting-btn el-icon-setting"
+        class="toolbar-btn setting-btn jm-icon-settings"
         title="设置"
         type="button"
         v-popover:popover-setting
@@ -119,9 +119,11 @@
       <button
         class="toolbar-btn fullscreen-btn"
         type="button"
-        :class="flags.fullscreen ? 'icon-exitfullscreen' : 'icon-fullscreen'"
+        :class="
+          flags.fullscreen ? 'jm-icon-exitfullscreen' : 'jm-icon-fullscreen'
+        "
         :title="flags.fullscreen ? '取消全屏' : '全屏'"
-        @click="handleToolbarBtnClick('fullscreen')"
+        @click="handleToolbar('fullscreen')"
       ></button>
     </div>
     <div class="overlayers">
@@ -173,13 +175,13 @@
             <span class="label">旋转画面</span>
             <div class="input__wrap">
               <button
-                class="toolbar-btn icon-rotate-left"
+                class="toolbar-btn jm-icon-rotate-left"
                 title="向左旋转90度"
                 type="button"
                 @click="rotate(-90, true)"
               ></button>
               <button
-                class="toolbar-btn icon-rotate-right"
+                class="toolbar-btn jm-icon-rotate-right"
                 title="向右旋转90度"
                 type="button"
                 @click="rotate(90, true)"
@@ -320,10 +322,15 @@ export default {
     noSignalText: {
       type: String,
       default: '无信号'
+    },
+    loadingText: {
+      type: String,
+      default: '拼命加载中...'
     }
   },
   components: {},
   inject: {
+    /** @returns {any} */
     rootTabs: {
       default: ''
     }
@@ -367,6 +374,7 @@ export default {
     }
   },
   computed: {
+    /** @returns {string} */
     displayTitle() {
       return this.title || this.url
     },
@@ -376,6 +384,7 @@ export default {
     },
     /** @returns {number} */
     volume: {
+      /** @returns {number} */
       set(val) {
         if (!this.player) return
 
@@ -391,6 +400,7 @@ export default {
           this.$emit('muted', this.player.volume)
         }
       },
+      /** @returns {number} */
       get() {
         return this.player?.volume ?? 100
       }
@@ -682,7 +692,7 @@ export default {
     },
     /** 截图 */
     snapshot() {
-      this.player?.snapshot(this.title)
+      this.player?.snapshot(this.displayTitle)
     },
     recording() {
       this.player?.recording(this.title)
@@ -717,8 +727,9 @@ export default {
     },
     // #endregion
 
-    handleToolbarBtnClick(cmd) {
+    handleToolbar(cmd) {
       if (!this.player) return
+
       switch (cmd) {
         case 'play':
           this.togglePlay()
