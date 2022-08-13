@@ -2,7 +2,7 @@
 
 # 介绍
 基于[jsmpeg.js](https://github.com/phoboslab/jsmpeg)二次开发的vue组件，欢迎各位一起维护
-
+- **仅支持mpeg1格式视频、mp2格式音频！！！仅支持mpeg1格式视频、mp2格式音频！！！仅支持mpeg1格式视频、mp2格式音频！！！**
 - web播放实时视频流的几种方案对比，详见[此处](https://blog.csdn.net/a843334549/article/details/117319350)
 - 详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
 - jsmpeg.js项目地址：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)
