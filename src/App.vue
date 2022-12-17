@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import { formatTimestamp } from '@/components/jsmpeg-player/jsmpeg/utils'
+
 const demoUrl = 'ws://localhost:8891'
 
 class Timer {
@@ -40,34 +42,6 @@ class Timer {
   }
 }
 
-/** 补零 */
-export function prefixPadZero(num) {
-  if (num < 10) {
-    return '0' + num
-  }
-  return num
-}
-
-export function formatTime(mss) {
-  let minutes = parseInt(mss / 1000),
-    seconds = parseInt(minutes / 60),
-    hours = parseInt(seconds / 60)
-
-  if (minutes >= 60) {
-    minutes %= 60
-  }
-  if (seconds >= 60) {
-    seconds %= 60
-  }
-  if (hours >= 24) {
-    hours %= 24
-  }
-
-  return `${prefixPadZero(hours)}:${prefixPadZero(seconds)}:${prefixPadZero(
-    minutes
-  )}.${mss % 1000}`
-}
-
 export default {
   name: 'App',
   components: {},
@@ -82,7 +56,7 @@ export default {
   },
   computed: {
     currTime() {
-      return formatTime(this.timer.time)
+      return formatTimestamp(this.timer.time, true)
     },
     demoUrl() {
       return demoUrl

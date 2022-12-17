@@ -1,6 +1,6 @@
 {
   "name": "vue-jsmpeg-player",
-  "version": "1.0.1-beta",
+  "version": "1.0.2-beta",
   "description": "基于jsmpeg.js开发的流媒体播放器",
   "license": "MIT",
   "main": "dist/jsmpeg-player.umd.min.js",
@@ -49,7 +49,8 @@
   },
   "peerDependencies": {
     "vue": "^2.6.14",
-    "element-ui": "^2.15.0"
+    "element-ui": "^2.15.0",
+    "core-js": "^3.0.0"
   },
   "browserslist": [
     "> 1%",

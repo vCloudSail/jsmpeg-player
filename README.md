@@ -7,6 +7,7 @@
 - 详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
 - jsmpeg.js项目地址：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)
 - [jsmpeg官网](https://jsmpeg.com/)
+- 关于延迟问题，在局域网下实测1s左右，但在公网下需要考虑带宽问题
 
 # 软件架构
 
@@ -169,15 +170,23 @@ export default {
 | no-signal | 无   | 无信号时的插槽，使用此插槽后noSignalText属性失效 |
 
 ## 功能 & 计划
+### 功能
 - [x] 自动重连
 - [x] 接流中断loading
 - [x] 截图
 - [x] 录制
 - [x] 画面旋转
 - [x] 全屏切换
+- [x] 全屏切换
+- [ ] 多播放器同屏显示
+- [ ] 国际化
 - [ ] 剔除element-ui的依赖，自行实现部分组件
 - [ ] 画中画显示(原生只支持video元素画中画显示，目前还没想到方案)
 - [ ] 已知的性能问题(在data中定义了player，导致被双向绑定)
+### 计划
+
+**v1.0.2-beta**
+- [x] 抽离录制器
 
 
 ## 效果演示
@@ -212,6 +221,8 @@ export default {
 2. 运行cmd: npm i
 3. 运行cmd: npm run dev:full
 4. 会分别弹出两个命令行窗口，一个是ffmpeg转码，一个是中转服务器
+
+ffmpeg拉取桌面流见此文章：https://waitwut.info/blog/2013/06/09/desktop-streaming-with-ffmpeg-for-lower-latency/
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f977c4e6f0434e03a0eb8ea287b55e23.png)
 

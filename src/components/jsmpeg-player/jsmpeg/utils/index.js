@@ -64,3 +64,41 @@ export function download(blob, name = 'JSMpeg_' + Date.now(), mimeType = '') {
     }, 1000)
   }
 }
+
+/**
+ *
+ * @param {number} num
+ * @param {number} len
+ * @returns
+ */
+function prefixPadZero(num, len = 2) {
+  return (num + '').padStart(len, '0')
+}
+
+/**
+ * 格式化时间戳(毫秒)为时分秒
+ * @param {number} timestamp
+ * @param {boolean} showMs
+ * @returns
+ */
+export function formatTimestamp(timestamp, showMs) {
+  let minutes = parseInt(timestamp / 1000),
+    seconds = parseInt(minutes / 60),
+    hours = parseInt(seconds / 60)
+
+  let result
+  if (hours < 1) {
+    result = `${prefixPadZero(seconds % 60)}:${prefixPadZero(minutes % 60)}`
+  }
+  if (hours >= 1) {
+    result = `${prefixPadZero(hours % 24)}:${prefixPadZero(
+      seconds % 60
+    )}:${prefixPadZero(minutes % 60)}`
+  }
+
+  if (showMs) {
+    result += `:${prefixPadZero(timestamp % 1000, 3)}`
+  }
+
+  return result
+}

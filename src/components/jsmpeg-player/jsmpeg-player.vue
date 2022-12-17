@@ -22,10 +22,7 @@
         class="recording-tips"
         v-if="isRecording"
       >
-        <div
-          class="recording-icon"
-          :class="recordingDuration % 2 == 0 ? 'is-hide' : ''"
-        />
+        <div class="recording-icon" />
         REC <template v-if="showTitle"> {{ recordingDurationLabel }} </template>
       </div>
       <button
@@ -230,26 +227,8 @@
 
 <script>
 import JSMpeg from './jsmpeg'
-import fullscreen from '@/utils/fullscreen'
-
-/** 补零 */
-function prefixPadZero(num) {
-  return (num >= 10 ? '' : '0') + num
-}
-
-/**
- * 将秒转换为时：分：秒
- */
-function formatTime(time) {
-  const seconds = parseInt(time % 60),
-    minutes = parseInt(time / 60),
-    hours = parseInt(minutes / 60)
-  return time < 3600
-    ? `${prefixPadZero(minutes)}:${prefixPadZero(seconds)}`
-    : `${prefixPadZero(hours)}:${prefixPadZero(minutes)}:${prefixPadZero(
-        seconds
-      )}`
-}
+import fullscreen from './jsmpeg/utils/fullscreen'
+import { formatTimestamp } from './jsmpeg/utils'
 
 const defaultOptions = () => ({
   /** 是否循环播放视频(仅静态文件)。默认true */
@@ -341,14 +320,14 @@ export default {
   data() {
     return {
       loading: false,
-      /** @type {import('./jsmpeg/types').JSMpegPlayer} */
+      /** @type {import('./jsmpeg/index').default} */
       player: null,
       lastVolume: 0,
       flags: {
         /**
          * 是否处于无信号状态
-         * 1.当流中断事件触发后，15秒后还没有收到ws消息
-         * 2.ws关闭事件触发
+         * 1. 当流中断事件触发后，15秒后还没有收到ws消息
+         * 2. ws关闭事件触发
          */
         noSignal: false,
         /** 是否已获取到视频分辨率 */
@@ -374,6 +353,10 @@ export default {
     }
   },
   computed: {
+    // /** @type {import('./jsmpeg/types').JSMpegPlayer} */
+    // player() {
+    //   return this._player
+    // },
     /** @returns {string} */
     displayTitle() {
       return this.title || this.url
@@ -420,7 +403,7 @@ export default {
     },
     /** @returns {string} */
     currentTimeLabel() {
-      return formatTime(this.currentTime)
+      return formatTimestamp(this.currentTime * 1000)
     },
     /** @returns {boolean} */
     isMuted() {
@@ -436,7 +419,7 @@ export default {
     },
     /** @returns {string} */
     recordingDurationLabel() {
-      return formatTime(this.recordingDuration)
+      return formatTimestamp(this.recordingDuration)
     },
     /** @returns {boolean} */
     showCloseBtn() {
@@ -445,8 +428,6 @@ export default {
     /** @returns {boolean} */
     showTitle() {
       return this.flags.playerHover
-      // &&
-      // (this.$slots.title || this.title || this.showCloseBtn)
     }
   },
   watch: {
@@ -487,7 +468,7 @@ export default {
     if (this.rootTabs) {
       this.rootTabs.$on('tab-click', (tab) => {
         try {
-          // 处理el-tabs切换标签时，el-table右侧可能出现空白的Bug
+          // 处理el-tabs切换标签时，进入后台播放
           if (!tab.$el?.contains(this.$el)) {
             this.intoBackground()
             this.$emit('update:inBackground', true)
@@ -498,6 +479,7 @@ export default {
     window.addEventListener('unload', () => {
       this.destroyPlayer()
     })
+
     this.init()
   },
   beforeDestroy() {
@@ -605,11 +587,12 @@ export default {
 
       console.log('player', this.player)
     },
+
+    // #region 方法
+    /** 旋转 */
     rotate(angle, append = false) {
       this.player.rotate(angle, append)
     },
-
-    // #region 方法
     /**
      * 进入画中画模式
      * @deprecated 未实现
@@ -639,15 +622,6 @@ export default {
       }
       this.flags.fullscreen = !this.flags.fullscreen
     },
-    play() {
-      if (!this.url) return
-
-      this.loading = true
-      if (!this.player) {
-        this.initPlayer()
-      }
-      this.player?.play()
-    },
     /**
      * 切换播放模式
      */
@@ -657,6 +631,15 @@ export default {
       } else {
         this.pause()
       }
+    },
+    play() {
+      if (!this.url) return
+
+      this.loading = true
+      if (!this.player) {
+        this.initPlayer()
+      }
+      this.player?.play()
     },
     pause() {
       this.player?.pause()
@@ -694,8 +677,12 @@ export default {
     snapshot() {
       this.player?.snapshot(this.displayTitle)
     },
-    recording() {
-      this.player?.recording(this.title)
+    toggleRecording() {
+      if (this.player?.isRecording) {
+        this.player?.stopRecording(this.title)
+      } else {
+        this.player?.startRecording('auto')
+      }
     },
 
     /**
@@ -744,7 +731,7 @@ export default {
           this.snapshot()
           break
         case 'recording':
-          this.recording()
+          this.toggleRecording()
           break
         case 'fullscreen':
           this.toggleFullscreen()
