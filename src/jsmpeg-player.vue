@@ -20,7 +20,7 @@
       </span>
       <div
         class="recording-tips"
-        v-if="isRecording"
+        v-if="playerStatus.recording"
       >
         <div class="recording-icon" />
         REC <template v-if="showTitle"> {{ recordingDurationLabel }} </template>
@@ -34,17 +34,31 @@
       ></button>
     </div>
     <div
-      class="player-canvas__wrap"
-      ref="canvas-wrap"
-      v-loading="loading"
-      :element-loading-text="loadingText"
+      class="player-main"
+      ref="player-main"
       @mousemove.passive="handleCanvasMouseMove"
       @click="handleCanvasClick"
       @dblclick="toggleFullscreen"
     >
+      <div
+        class="player-loading-mask"
+        v-show="loading"
+      >
+        <div class="player-loading">
+          <slot
+            v-if="hasLoadingSlot"
+            name="loading"
+            :text="loadingText"
+          ></slot>
+          <loading
+            v-else
+            :text="loadingText"
+          ></loading
+        ></div>
+      </div>
       <!-- <canvas class="jsmpeg-canvas"
               ref="canvas" /> -->
-      <template v-if="!loading && flags.noSignal">
+      <template v-if="!loading && playerStatus.noSignal">
         <template v-if="$slots['no-signal']">
           <slot name="no-signal" />
         </template>
@@ -56,25 +70,29 @@
     <div
       class="player-toolbar"
       v-if="withToolbar"
-      :class="{ 'is-show': player && flags.playerHover }"
+      :class="{ 'is-show': playerStatus.playerHover }"
       @mouseenter="handleToolbarMouseEnter"
       @mouseleave="handleToolbarMouseLeave"
     >
       <button
-        class="toolbar-btn play-btn"
+        class="toolbar-item play-btn"
         type="button"
         :class="paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'"
         :title="paused ? '播放' : '暂停'"
         @click="handleToolbar('play')"
       ></button>
+      <contextmenu class="toolbar-item">
+        <button
+          slot="reference"
+          class="stop-btn jm-icon-stop"
+          title="停止"
+          type="button"
+          @click="handleToolbar('stop')"
+        ></button>
+        <div slot="menu-item">asdasdasd</div>
+      </contextmenu>
       <button
-        class="toolbar-btn stop-btn jm-icon-stop"
-        title="停止"
-        type="button"
-        @click="handleToolbar('stop')"
-      ></button>
-      <button
-        class="toolbar-btn volume-btn"
+        class="toolbar-item volume-btn"
         type="button"
         title="音量"
         v-popover:popover-volume
@@ -95,31 +113,33 @@
         <i class="jm-icon-copy-document"></i>
       </button> -->
       <button
-        class="toolbar-btn snapshot-btn jm-icon-screenshots"
+        class="toolbar-item snapshot-btn jm-icon-screenshots"
         title="截图"
         type="button"
         @click="handleToolbar('snapshot')"
       ></button>
       <button
-        class="toolbar-btn recording-btn jm-icon-recording"
+        class="toolbar-item recording-btn jm-icon-recording"
         type="button"
-        :class="isRecording ? 'is-recording' : ''"
-        :title="isRecording ? '停止录制' : '录制'"
+        :class="playerStatus.recording ? 'is-recording' : ''"
+        :title="playerStatus.recording ? '停止录制' : '录制'"
         @click="handleToolbar('recording')"
       ></button>
       <button
-        class="toolbar-btn setting-btn jm-icon-settings"
+        class="toolbar-item setting-btn jm-icon-settings"
         title="设置"
         type="button"
         v-popover:popover-setting
       ></button>
       <button
-        class="toolbar-btn fullscreen-btn"
+        class="toolbar-item fullscreen-btn"
         type="button"
         :class="
-          flags.fullscreen ? 'jm-icon-exitfullscreen' : 'jm-icon-fullscreen'
+          playerStatus.fullscreen
+            ? 'jm-icon-fullscreen-exit'
+            : 'jm-icon-fullscreen'
         "
-        :title="flags.fullscreen ? '取消全屏' : '全屏'"
+        :title="playerStatus.fullscreen ? '取消全屏' : '全屏'"
         @click="handleToolbar('fullscreen')"
       ></button>
     </div>
@@ -172,13 +192,13 @@
             <span class="label">旋转画面</span>
             <div class="input__wrap">
               <button
-                class="toolbar-btn jm-icon-rotate-left"
+                class="toolbar-item jm-icon-rotate-left"
                 title="向左旋转90度"
                 type="button"
                 @click="rotate(-90, true)"
               ></button>
               <button
-                class="toolbar-btn jm-icon-rotate-right"
+                class="toolbar-item jm-icon-rotate-right"
                 title="向右旋转90度"
                 type="button"
                 @click="rotate(90, true)"
@@ -226,9 +246,12 @@
 </template>
 
 <script>
-import JSMpeg from './jsmpeg'
-import fullscreen from './jsmpeg/utils/fullscreen'
-import { formatTimestamp } from './jsmpeg/utils'
+import JSMpeg from './class/jsmpeg'
+import fullscreen from './class/jsmpeg/utils/fullscreen'
+import { formatTimestamp } from './class/jsmpeg/utils'
+import vLoading from './directives/loading'
+import Loading from './components/loading.vue'
+import Contextmenu from './components/contextmenu.vue'
 
 const defaultOptions = () => ({
   /** 是否循环播放视频(仅静态文件)。默认true */
@@ -241,20 +264,20 @@ const defaultOptions = () => ({
   poster: null,
   /** 是否禁用后台播放，当web页面处于非活动状态时是否暂停播放，默认true（注意，浏览器通常会在非活动标签中限制JS） */
   pauseWhenHidden: true,
-  /** 是否禁用WebGL，始终使用Canvas2D渲染器。默认.false */
+  /** 是否禁用WebGL，始终使用Canvas2D渲染器。默认false */
   disableGl: false,
   /** 是否禁用WebAssembly并始终使用JavaScript解码器。默认false */
   disableWebAssembly: false,
   /** WebGL上下文是否创建必要的“截图”。默认false */
   preserveDrawingBuffer: true,
-  /** 是否以块的形式加载数据(仅静态文件)。当启用时，回放可以在完整加载源之前开始，默认=true */
+  /** 是否以块的形式加载数据(仅静态文件)。当启用时，回放可以在完整加载源之前开始，默认true */
   progressive: true,
   /** 当不需要回放时是否推迟加载块。默认=progressive */
   throttled: true,
   /** 使用时，以字节为单位加载的块大小。默认(1 mb)1024*1024 */
   chunkSize: 1024 * 1024,
   /** 是否解码并显示视频的第一帧，一般用于设置画布大小以及使用初始帧作为"poster"图像。当使用自动播放或流媒体资源时，此参数不受影响。默认true */
-  decodeFirstFrame: false,
+  decodeFirstFrame: true,
   /** 流媒体时，以秒为单位的最大排队音频长度。（可以理解为能接受的最大音画不同步时间） */
   maxAudioLag: 0.25,
   /** 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。 */
@@ -304,14 +327,20 @@ export default {
     },
     loadingText: {
       type: String,
-      default: '拼命加载中...'
+      default: '拼命加载中'
     }
   },
-  components: {},
+  directives: { vLoading },
+  components: { Loading, Contextmenu },
   inject: {
     /** @returns {any} */
     rootTabs: {
       default: ''
+    }
+  },
+  provide() {
+    return {
+      player: this
     }
   },
   // #endregion
@@ -320,10 +349,9 @@ export default {
   data() {
     return {
       loading: false,
-      /** @type {import('./jsmpeg/index').default} */
-      player: null,
       lastVolume: 0,
-      flags: {
+      syncTimer: null,
+      playerStatus: {
         /**
          * 是否处于无信号状态
          * 1. 当流中断事件触发后，15秒后还没有收到ws消息
@@ -335,7 +363,15 @@ export default {
         /** 是否鼠标悬停在播放器内部 */
         playerHover: false,
         /** 是否处于全屏播放 */
-        fullscreen: false
+        fullscreen: false,
+        //
+        playing: false,
+        backgroud: false,
+        currentTime: 0,
+        recording: false,
+        recordingDuration: 0,
+        volume: 0,
+        paused: true
       },
       playerSettings: {
         disableGl: false,
@@ -353,17 +389,13 @@ export default {
     }
   },
   computed: {
-    // /** @type {import('./jsmpeg/types').JSMpegPlayer} */
-    // player() {
-    //   return this._player
-    // },
     /** @returns {string} */
     displayTitle() {
       return this.title || this.url
     },
     /** @returns {boolean} */
     paused() {
-      return this.player?.paused ?? true
+      return this.playerStatus?.paused ?? true
     },
     /** @returns {number} */
     volume: {
@@ -371,63 +403,53 @@ export default {
       set(val) {
         if (!this.player) return
 
+        let volume
         if (val >= 1) {
-          this.player.volume = 1
+          volume = 1
         } else if (val <= 0) {
-          this.player.volume = 0
+          volume = 0
         } else {
-          this.player.volume = val
+          volume = val
         }
 
-        if (this.player.volume === 0) {
-          this.$emit('muted', this.player.volume)
+        if (volume === 0) {
+          this.$emit('muted')
         }
+        this.playerStatus.volume = this.player.volume = volume
       },
       /** @returns {number} */
       get() {
-        return this.player?.volume ?? 100
+        return this.playerStatus.volume
       }
     },
     /** @returns {number} */
     volumePercent() {
       return parseInt(this.volume * 100)
     },
-    /** @returns {number} */
-    currentTime: {
-      set(val) {
-        this.player.currentTime = val
-      },
-      get() {
-        return this.player?.currentTime ?? 0
-      }
-    },
     /** @returns {string} */
     currentTimeLabel() {
-      return formatTimestamp(this.currentTime * 1000)
+      return formatTimestamp(this.playerStatus.currentTime * 1000)
     },
     /** @returns {boolean} */
     isMuted() {
       return this.volume === 0
     },
-    /** @returns {boolean} */
-    isRecording() {
-      return this.player && this.player.isRecording
-    },
-    /** @returns {number} */
-    recordingDuration() {
-      return this.player ? this.player.recordingDuration : 0
-    },
     /** @returns {string} */
     recordingDurationLabel() {
-      return formatTimestamp(this.recordingDuration)
+      return formatTimestamp(this.playerStatus.recordingDuration)
     },
     /** @returns {boolean} */
     showCloseBtn() {
-      return this.closeable && !this.flags.fullscreen
+      return this.closeable && !this.playerStatus.fullscreen
     },
     /** @returns {boolean} */
     showTitle() {
-      return this.flags.playerHover
+      return this.playerStatus.playerHover
+    },
+
+    /** @returns {boolean} */
+    hasLoadingSlot() {
+      return this.$slots['loading'] || this.$scopedSlots['loading']
     }
   },
   watch: {
@@ -481,8 +503,17 @@ export default {
     })
 
     this.init()
+
+    this.syncTimer = setInterval(() => {
+      if (this.player) {
+        this.playerStatus.currentTime = this.player.currentTime
+      }
+    }, 1000)
   },
   beforeDestroy() {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer)
+    }
     this.destroyPlayer()
   },
   // #endregion
@@ -496,83 +527,151 @@ export default {
       if (!this.url) return
 
       this.loading = true
-      this.player = new JSMpeg.Player(this.url, {
-        contianer: this.$refs['canvas-wrap'],
-        ...this.options,
-        onVideoDecode: (decoder, time) => {
-          this.$emit('video-decode', decoder, time)
-        },
-        onAudioDecode: (decoder, time) => {
-          this.$emit('audio-decode', decoder, time)
-        },
-        onPlay: (player) => {
-          this.loading = false
-          console.log('onPlay')
-          this.$emit('play', player)
-        },
-        onPause: (player) => {
-          this.loading = false
-          console.log('onPause')
-          this.$emit('pause', player)
-        },
-        onEnded: (player) => {
-          console.log('onEnded')
-          this.$emit('ended', player)
-        },
-        onStalled: (player) => {
-          console.log('onStalled')
-          this.$emit('stalled', player)
-        },
-        onSourceEstablished: (source) => {
-          console.log('onSourceEstablished')
-
-          this.flags.noSignal = false
-          this.loading = false
-          clearTimeout(this.timers.noSignal)
-          this.timers.noSignal = null
-
-          this.$emit('source-established', source)
-        },
-        onSourceCompleted: (source) => {
-          console.log('onSourceCompleted')
-          this.$emit('source-completed', source)
-        },
-        onSourceConnected: () => {
-          console.log('onSourceConnected')
-          clearTimeout(this.timers.noSignal)
-          this.loading = true
-          this.flags.noSignal = false
-          this.$emit('source-connected')
-        },
-        onSourceStreamInterrupt: () => {
-          console.log('onSourceStreamInterrupt')
-          this.loading = true
-          clearTimeout(this.timers.noSignal)
-
-          this.timers.noSignal = setTimeout(this.handleNoSignal, 15000)
-          this.$emit('source-interrupt')
-        },
-        onSourceStreamContinue: () => {
-          console.log('onSourceStreamContinue')
-          clearTimeout(this.timers.noSignal)
-          this.timers.noSignal = null
-          this.loading = false
-          this.flags.noSignal = false
-          this.$emit('source-continue')
-        },
-        onSourceClosed: () => {
-          console.log('onSourceClosed')
-          clearTimeout(this.timers.noSignal)
-          this.$emit('source-closed')
-          this.handleNoSignal()
-        },
-        onResolutionDecode: (width, height) => {
-          // 从流中获取到视频的分辨率
-          this.flags.gotResolution = true
-          this.settingPlayer('autoStretch', this.playerSettings.autoStretch)
-          this.$emit('resolution-decode', width, height)
-        }
+      let player = new JSMpeg.Player(this.url, {
+        contianer: this.$refs['player-main'],
+        ...this.options
       })
+      this.$emit('player-loaded', player)
+
+      // #region 原生事件
+      player.on('video-decode', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 视频帧解码')
+
+        // this.playerStatus.currentTime = player.currentTime
+        this.$emit('video-decode', ...detail)
+      })
+      player.on('audio-decode', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 音频帧解码')
+
+        this.$emit('audio-decode', ...detail)
+      })
+      player.on('play', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 播放开始')
+
+        this.playerStatus.playing = player.isPlaying
+        this.playerStatus.paused = player.paused
+        this.loading = false
+        this.$emit('play', player)
+      })
+      player.on('pause', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 播放暂停')
+
+        this.playerStatus.playing = player.isPlaying
+        this.playerStatus.paused = player.paused
+        this.loading = false
+        console.log('onPause')
+        this.$emit('pause', player)
+      })
+      player.on('stalled', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 播放停滞')
+
+        this.playerStatus.playing = player.isPlaying
+        this.playerStatus.paused = player.paused
+        this.$emit('stalled', player)
+      })
+      player.on('ended', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 播放结束')
+
+        this.playerStatus.currentTime = player.currentTime
+        this.playerStatus.playing = player.isPlaying
+        this.playerStatus.paused = player.paused
+        this.$emit('ended', player)
+      })
+      player.on('source-established', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 源通道建立')
+
+        this.playerStatus.noSignal = false
+        this.loading = false
+        clearTimeout(this.timers.noSignal)
+        this.timers.noSignal = null
+
+        this.$emit('source-established', ...detail)
+      })
+      player.on('source-completed', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 源播放完成')
+
+        console.log('onSourceCompleted')
+        this.$emit('source-completed', ...detail)
+      })
+      // #endregion
+
+      // #region 扩展事件
+      player.on('resolution-decode', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 分辨率解码')
+
+        this.playerStatus.gotResolution = true
+        this.settingPlayer('autoStretch', this.playerSettings.autoStretch)
+        this.$emit('resolution-decode', ...detail)
+      })
+
+      // #region 录制相关
+      player.on('recording-start', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
+
+        this.playerStatus.recording = player.recorder.running
+        this.$emit('recording-start', ...detail)
+      })
+      player.on('recording-pause', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
+        this.$emit('recording-pause', ...detail)
+      })
+      player.on('recording-continue', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
+        this.$emit('recording-continue', ...detail)
+      })
+      player.on('recording-end', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
+        this.playerStatus.recording = player.recorder.running
+        this.$emit('recording-end', ...detail)
+      })
+      player.on('recording-tick', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
+        this.playerStatus.recordingDuration = player.recorder.duration
+        this.$emit('recording-tick', ...detail)
+      })
+      player.on('recording-data', ({ detail = [] } = {}) => {
+        // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
+        this.$emit('recording-data', ...detail)
+      })
+      // #endregion
+
+      player.on('source-connected', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 源连接')
+
+        clearTimeout(this.timers.noSignal)
+        this.loading = true
+        this.playerStatus.noSignal = false
+        this.$emit('source-connected', ...detail)
+      })
+      player.on('source-interrupt', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 源传输中断')
+
+        this.loading = true
+        clearTimeout(this.timers.noSignal)
+
+        this.timers.noSignal = setTimeout(this.handleNoSignal, 15000)
+        this.$emit('source-interrupt', ...detail)
+      })
+      player.on('source-continue', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 源传输恢复/继续')
+
+        clearTimeout(this.timers.noSignal)
+        this.timers.noSignal = null
+        this.loading = false
+        this.playerStatus.noSignal = false
+        this.$emit('source-continue', ...detail)
+      })
+      player.on('source-closed', ({ detail = [] } = {}) => {
+        console.log('[JSMpegPlayer] 事件触发 -> 源关闭')
+
+        clearTimeout(this.timers.noSignal)
+        this.$emit('source-closed', ...detail)
+        this.handleNoSignal()
+      })
+      // #endregion
+
+      this.player = player
+
       this.playerSettings.backgroudPlay = !this.options.pauseWhenHidden
 
       if (this.defaultMute) {
@@ -585,7 +684,7 @@ export default {
         this.settingPlayer(key, this.playerSettings[key])
       }
 
-      console.log('player', this.player)
+      console.log('player', player)
     },
 
     // #region 方法
@@ -613,14 +712,14 @@ export default {
      * 切换全屏模式
      */
     toggleFullscreen() {
-      if (this.flags.fullscreen) {
+      if (this.playerStatus.fullscreen) {
         fullscreen.exit(this.$el)
       } else {
         fullscreen.request(this.$el, () => {
-          this.flags.fullscreen = false
+          this.playerStatus.fullscreen = false
         })
       }
-      this.flags.fullscreen = !this.flags.fullscreen
+      this.playerStatus.fullscreen = !this.playerStatus.fullscreen
     },
     /**
      * 切换播放模式
@@ -690,9 +789,10 @@ export default {
      */
     settingPlayer(optionName, value) {
       if (!this.player) return
+
       switch (optionName) {
         case 'autoStretch':
-          if (!this.flags.gotResolution) return
+          if (!this.playerStatus.gotResolution) return
 
           const canvas = this.player.canvas
           if (value) {
@@ -739,28 +839,28 @@ export default {
       }
     },
     handleNoSignal() {
-      this.flags.noSignal = true
+      this.playerStatus.noSignal = true
       this.loading = false
       this.stop()
       this.$emit('no-signal')
     },
     handlePlayerMouseEnter() {
-      this.flags.playerHover = true
+      this.playerStatus.playerHover = true
     },
     handleCanvasMouseMove() {
-      this.flags.playerHover = true
+      this.playerStatus.playerHover = true
       clearTimeout(this.timers.canvasMouseMove)
       this.timers.canvasMouseMove = setTimeout(() => {
-        this.flags.playerHover = false
+        this.playerStatus.playerHover = false
       }, 3000)
     },
     handlePlayerMouseLeave() {
       clearTimeout(this.timers.canvasMouseMove)
-      this.flags.playerHover = false
+      this.playerStatus.playerHover = false
     },
     handleCanvasClick() {},
     handleToolbarMouseEnter() {
-      this.flags.playerHover = true
+      this.playerStatus.playerHover = true
       clearTimeout(this.timers.canvasMouseMove)
     },
     handleToolbarMouseLeave() {}

@@ -7,6 +7,7 @@ export default class MP2WASM extends BaseDecoder {
     super(options)
 
     this.onDecodeCallback = options.onAudioDecode
+
     this.module = options.wasmModule
 
     this.bufferSize = options.audioBufferSize || 128 * 1024
@@ -119,9 +120,9 @@ export default class MP2WASM extends BaseDecoder {
     this.advanceDecodedTime(MP2WASM.SAMPLES_PER_FRAME / this.sampleRate)
 
     let elapsedTime = Now() - startTime
-    if (this.onDecodeCallback) {
-      this.onDecodeCallback(this, elapsedTime)
-    }
+    this.onDecodeCallback?.(this, elapsedTime)
+    this.eventBus?.emit('audio-decode', this, elapsedTime)
+
     return true
   }
 

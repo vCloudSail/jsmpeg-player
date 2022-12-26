@@ -1,31 +1,34 @@
 <template>
-  <transition
-    :name="transition"
-    @after-enter="$emit('opened')"
-    @after-leave="$emit('closed')"
-  >
-    <div
-      class="cl-contextmenu"
-      ref="popup"
-      v-show="visible"
-      :style="bindStyle"
-      @click.stop
-      @mousedown.stop
-      @contextmenu.prevent
+  <div ref="reference">
+    <slot name="reference"></slot>
+    <transition
+      :name="transition"
+      @after-enter="$emit('opened')"
+      @after-leave="$emit('closed')"
     >
-      <template v-if="$slots['menu-item']">
-        <ul class="menu-list">
-          <li
-            class="menu-item"
-            v-for="(item, index) of menus"
-            :key="index"
-          >
-          </li>
-        </ul>
-      </template>
-      <template v-else> <slot /></template>
-    </div>
-  </transition>
+      <div
+        class="cl-contextmenu"
+        ref="contextmenu"
+        v-show="visible"
+        :style="bindStyle"
+        @click.stop
+        @mousedown.stop
+        @contextmenu.prevent
+      >
+        <template v-if="$slots['menu-item']">
+          <ul class="menu-list">
+            <li
+              class="menu-item"
+              v-for="(item, index) of menus"
+              :key="index"
+            >
+            </li>
+          </ul>
+        </template>
+        <template v-else> <slot /></template>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script>
@@ -34,12 +37,10 @@ function nextZIndex() {
   return zIndex++
 }
 
-const computed = {}
-
 /**
  * @name Contextmenu
  * @description 弹出式上下文菜单
- * @author lcm
+ * @author cloudsail
  */
 export default {
   name: 'Contextmenu',
@@ -90,7 +91,21 @@ export default {
       zIndex: null
     }
   },
-  computed: computed,
+  computed: {
+    /** @type {boolean} */
+    hasReferenceSlot() {
+      return (
+        (this.$slots['reference'] ?? this.$scopedSlots['reference']) != null
+      )
+    },
+    /** @type {boolean} */
+    hasContextmenuSlot() {
+      return (
+        (this.$slots['contextmenu']?.[0] ?? this.$scopedSlots['contextmenu']) !=
+        null
+      )
+    }
+  },
   watch: {
     data(nval) {
       this.inputData = nval
@@ -129,19 +144,23 @@ export default {
 
   // #region 生命周期
   mounted() {
-    this.bindTrigger(this.trigger)
-
     document.addEventListener('resize', (e) => {
       if (this.visible) {
         this.close()
         document.removeEventListener('mousedown', this.close)
       }
     })
+
+    this.$refs['contextmenu'].style.zIndex = nextZIndex()
     if (this.appendToBody) {
-      document.body.appendChild(this.$el)
+      document.body.appendChild(this.$refs['contextmenu'])
     }
 
-    this.$el.style.zIndex = nextZIndex()
+    if (this.hasReferenceSlot) {
+      this.addTrigger(this.$el, this.trigger)
+    } else {
+      this.addTrigger(this.reference, this.trigger)
+    }
   },
   beforeDestroy() {
     if (this.appendToBody) {

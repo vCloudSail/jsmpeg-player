@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { formatTimestamp } from '@/components/jsmpeg-player/jsmpeg/utils'
+import { formatTimestamp } from '@/class/jsmpeg/utils'
 
 const demoUrl = 'ws://localhost:8891'
 

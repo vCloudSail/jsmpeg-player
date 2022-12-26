@@ -7,6 +7,8 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 module.exports = defineConfig({
   publicPath: './',
   outputDir: 'dist',
@@ -22,15 +24,18 @@ module.exports = defineConfig({
     open: true
     // https: true,
   },
-  configureWebpack: {
-    resolve: {
-      // externals: [ '.js', '.ts', '.vue', '.json' ],
-      alias: {
-        '@': resolve('src')
+  configureWebpack() {
+    return {
+      entry: isProduction ? './src/index.js' : './demo/main.js',
+      resolve: {
+        // externals: [ '.js', '.ts', '.vue', '.json' ],
+        alias: {
+          '@': resolve('src')
+        }
+      },
+      output: {
+        libraryExport: 'default'
       }
-    },
-    output: {
-      libraryExport: 'default'
     }
   },
   chainWebpack(config) {

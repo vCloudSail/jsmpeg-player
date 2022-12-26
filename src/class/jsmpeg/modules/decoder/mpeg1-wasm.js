@@ -147,9 +147,9 @@ export default class MPEG1WASM extends BaseDecoder {
     this.advanceDecodedTime(1 / this.frameRate)
 
     let elapsedTime = Now() - startTime
-    if (this.onDecodeCallback) {
-      this.onDecodeCallback(this, elapsedTime)
-    }
+    this.onDecodeCallback?.(this, elapsedTime)
+    this.eventBus?.emit('video-decode', this, elapsedTime)
+
     return true
   }
 }

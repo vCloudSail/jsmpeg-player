@@ -66,9 +66,9 @@ export default class MP2 extends BaseDecoder {
     this.advanceDecodedTime(this.left.length / this.sampleRate)
 
     let elapsedTime = Now() - startTime
-    if (this.onDecodeCallback) {
-      this.onDecodeCallback(this, elapsedTime)
-    }
+    this.onDecodeCallback?.(this, elapsedTime)
+    this.eventBus?.emit('audio-decode', this, elapsedTime)
+
     return true
   }
 

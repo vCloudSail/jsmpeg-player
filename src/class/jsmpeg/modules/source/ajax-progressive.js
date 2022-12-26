@@ -1,6 +1,8 @@
 import { Now } from '../../utils'
 
 export default class AjaxProgressiveSource {
+  /** @type {import('../../utils/event-bus').EventBus} */
+  eventBus
   constructor(url, options) {
     this.url = url
     this.destination = null
@@ -20,6 +22,7 @@ export default class AjaxProgressiveSource {
     this.throttled = options.throttled !== false
     this.aborted = false
 
+    this.eventBus = options.eventBus
     this.onEstablishedCallback = options.onSourceEstablished
     this.onCompletedCallback = options.onSourceCompleted
   }
@@ -71,6 +74,7 @@ export default class AjaxProgressiveSource {
       this.completed = true
       if (this.onCompletedCallback) {
         this.onCompletedCallback(this)
+        this.eventBus?.emit('source-completed', this)
       }
       return
     }
@@ -119,6 +123,7 @@ export default class AjaxProgressiveSource {
 
     if (isFirstChunk && this.onEstablishedCallback) {
       this.onEstablishedCallback(this)
+      this.eventBus?.emit('source-established', this)
     }
 
     if (this.destination) {

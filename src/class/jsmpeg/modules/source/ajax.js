@@ -1,6 +1,8 @@
 'use strict'
 
 export default class AjaxSource {
+  /** @type {import('../../utils/event-bus').EventBus} */
+  eventBus
   constructor(url, options) {
     this.url = url
     this.destination = null
@@ -11,6 +13,7 @@ export default class AjaxSource {
     this.established = false
     this.progress = 0
 
+    this.eventBus = options.eventBus
     this.onEstablishedCallback = options.onSourceEstablished
     this.onCompletedCallback = options.onSourceCompleted
   }
@@ -56,9 +59,11 @@ export default class AjaxSource {
 
     if (this.onEstablishedCallback) {
       this.onEstablishedCallback(this)
+      this.eventBus?.emit('source-established', this)
     }
     if (this.onCompletedCallback) {
       this.onCompletedCallback(this)
+      this.eventBus?.emit('source-completed', this)
     }
 
     if (this.destination) {

@@ -1,6 +1,8 @@
 'use strict'
 
 export default class FetchSource {
+  /** @type {import('../../utils/event-bus').EventBus} */
+  eventBus
   constructor(url, options) {
     this.url = url
     this.destination = null
@@ -12,6 +14,7 @@ export default class FetchSource {
     this.progress = 0
     this.aborted = false
 
+    this.eventBus = options.eventBus
     this.onEstablishedCallback = options.onSourceEstablished
     this.onCompletedCallback = options.onSourceCompleted
   }

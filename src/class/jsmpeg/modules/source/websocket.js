@@ -24,6 +24,8 @@ export default class WSSource {
   socket
   /** @type {string} */
   url
+  /** @type {import('../../utils/event-bus').EventBus} */
+  eventBus
   onEstablishedCallback
   onCompletedCallback
   onClosedCallback
@@ -43,6 +45,7 @@ export default class WSSource {
       options.reconnectInterval !== undefined ? options.reconnectInterval : 5
     this.shouldAttemptReconnect = !!this.reconnectInterval
 
+    this.eventBus = options.eventBus
     this.onEstablishedCallback = options.onSourceEstablished
     this.onCompletedCallback = options.onSourceCompleted // Never used
     this.onClosedCallback = options.onSourceClosed
@@ -150,6 +153,7 @@ export default class WSSource {
     this.isOpened = true
     if (this.onConnectedCallback) {
       this.onConnectedCallback(this)
+      this.eventBus?.emit('source-connected', this)
     }
     this.startStreamTimeoutTimer()
   }
@@ -165,6 +169,7 @@ export default class WSSource {
       this.progress = 0
       if (this.onClosedCallback) {
         this.onClosedCallback(this)
+        this.eventBus?.emit('source-closed', this)
       }
       clearTimeout(this.reconnectTimeoutId)
       this.reconnectTimeoutId = setTimeout(this.start.bind(this), 5000)
@@ -194,10 +199,12 @@ export default class WSSource {
         this.established = true
         this.isStreamInterrupt = false
         this.onEstablishedCallback?.(this)
+        this.eventBus?.emit('source-established', this)
         console.log(ev)
       } else if (this.isStreamInterrupt) {
         this.isStreamInterrupt = false
         this.onStreamContinueCallback?.(this)
+        this.eventBus?.emit('source-continue', this)
       }
 
       if (this.destination) {
@@ -229,6 +236,7 @@ export default class WSSource {
       this.isStreamInterrupt = true
       if (this.onStreamInterruptCallback) {
         this.onStreamInterruptCallback()
+        this.eventBus?.emit('source-interrupt', this)
       }
     }, 5000)
   }

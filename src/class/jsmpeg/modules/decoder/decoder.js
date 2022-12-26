@@ -3,11 +3,14 @@ import CanvasRenderer from '../renderer/canvas2d'
 import WebGLRenderer from '../renderer/webgl'
 
 export default class BaseDecoder {
+  /** @type {import('../../utils/event-bus').EventBus} */
+  eventBus
   /**
    * @type {WebGLRenderer|CanvasRenderer|WebAudioOut}
    */
   destination
   constructor(options) {
+    this.eventBus = options.eventBus
     this.destination = null
     this.canPlay = false
 

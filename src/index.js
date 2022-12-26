@@ -1,6 +1,5 @@
-import JsmpegPlayer from './components/jsmpeg-player'
-
-// import './components/jsmpeg-player/styles/index.scss'
+import JsmpegPlayer from './jsmpeg-player.vue'
+import JSMpeg from './class/jsmpeg'
 
 export function install(Vue) {
   if (install.installed) return
@@ -26,5 +25,6 @@ if (GlobalVue) {
 
 export default {
   install,
-  JsmpegPlayer
+  JsmpegPlayer,
+  JSMpeg
 }

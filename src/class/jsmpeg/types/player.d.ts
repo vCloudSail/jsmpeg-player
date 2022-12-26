@@ -1,11 +1,5 @@
-import WSSource from '../modules/source/websocket'
-
-export interface JSMpeg {
-  Player(url, options: PlayerOptions): JSMpegPlayer
-}
-
 export interface PlayerOptions {
-  /** 容器元素或选择器字符串 */
+  /** 容器元素或选择器字符串[必填] */
   contianer: HTMLElement | string
   /** 用于视频渲染的HTML画布元素。如果没有给出，渲染器将创建自己的Canvas元素。 */
   canvas?: HTMLCanvasElement
@@ -68,6 +62,7 @@ export interface PlayerOptions {
 }
 
 export interface JSMpegPlayer {
+  (url: string, options: PlayerOptions)
   /** 只读，是否暂停播放 */
   readonly paused: boolean
   /** 获取或设置音频音量(0-1) */

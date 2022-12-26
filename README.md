@@ -142,26 +142,26 @@ export default {
 
 支持jsmpeg.js所有原生事件，并转换为短横线命名法，[jsmpeg官方文档 - 事件](https://github.com/phoboslab/jsmpeg#usage)
 
-| 名称                  | 参数          | 说明                                                         |
-| --------------------- | ------------- | ------------------------------------------------------------ |
-| **以下是vue组件事件** | -             | -                                                            |
-| volume-change         | number        | 当音量变化时触发                                             |
-| muted                 | number        | 当静音时触发                                                 |
-| **以下是原生事件**    | -             | -                                                            |
-| video-decode          | -             | onVideoDecode                                                |
-| audio-decode          | -             | onAudioDecode                                                |
-| play                  | -             | onPlay                                                       |
-| pause                 | -             | onPause                                                      |
-| ended                 | -             | onEnded                                                      |
-| stalled               | -             | onStalled                                                    |
-| source-established    | -             | onSourceEstablished                                          |
-| source-completed      | -             | onSourceCompleted                                            |
-| **以下是扩展事件**    | -             | -                                                            |
-| source-connected      | -             | 当websocket连接上服务端时触发                                |
-| source-interrupt      | -             | 当websocket超过一定时间（5s）没有收到流时触发                |
-| source-continue       | -             | 当onSourceStreamInterrupt触发后websocket第一次接收到流时触发 |
-| source-closed         | -             | 当websocket关闭后触发                                        |
-| resolution-decode     | width, height | 当获取到视频分辨率后触发                                     |
+| 名称               | 原生回调名称            | 参数                     | 说明                                                                                             |
+| ------------------ | ----------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| **vue组件事件**    | -                       | -                        | -                                                                                                |
+| volume-change      | -                       | number                   | 当音量变化时触发                                                                                 |
+| muted              | -                       | number                   | 当静音时触发                                                                                     |
+| **原生事件**       |                         | -                        | -                                                                                                |
+| video-decode       | [onVideoDecode]()       | decoder, time            | 视频帧解码事件，当成功解码视频帧时触发                                                           |
+| audio-decode       | [onAudioDecode]()       | decoder, time            | 音频帧解码事件，当成功解码音频帧时触发                                                           |
+| play               | [onPlay]()              | player                   | 播放开始事件                                                                                     |
+| pause              | [onPause]()             | player                   | 播放暂停事件                                                                                     |
+| ended              | [onEnded]()             | player                   | 播放结束事件                                                                                     |
+| stalled            | [onStalled]()           | player                   | 播放停滞事件，当没有足够的数据播放一帧时触发                                                     |
+| source-established | [onSourceEstablished]() | source                   | 源通道建立事件，当source第一次收到数据包时触发                                                   |
+| source-completed   | [onSourceCompleted]()   | source                   | 源播放完成事件，当source收到所有数据时触发（即最后一个数据包）                                   |
+| **扩展事件**       |                         | -                        | -                                                                                                |
+| source-connected   | -                       | -                        | 源连接事件（仅websocket），当source(websocket)连接上服务端时触发                                 |
+| source-interrupt   | -                       | -                        | 源传输中断事件（仅websocket），当source(websocket)超过一定时间（5s）没有收到流时触发             |
+| source-continue    | -                       | -                        | 源传输恢复/继续事件（仅websocket），当onSourceStreamInterrupt触发后websocket第一次接收到流时触发 |
+| source-closed      | -                       | -                        | 源关闭事件（仅websocket），当websocket关闭后触发                                                 |
+| resolution-decode  | -                       | decoder, {width, height} | 分辨率解码事件，当获取到视频分辨率时触发发                                                       |
 
 ## 插槽 & Slot:
 | 名称      | 参数 | 说明                                             |

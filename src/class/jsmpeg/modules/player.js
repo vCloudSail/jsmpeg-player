@@ -11,16 +11,24 @@ import WSSource from './source/websocket'
 import BitBuffer from './buffer'
 import Recorder from './recorder'
 
+import { EventBus } from '../utils/event-bus'
+
 // The build process may append `JSMpeg.WASM_BINARY_INLINED = base64data;`
 // to the minified source.
 // If this property is present, jsmpeg will use the inlined binary data
 // instead of trying to load a jsmpeg.wasm file via Ajax.
+
 /**
  * @class {import('../jsmpeg').JSMpegPlayer}
- * @author 刘灿民
- * @description 基于jsmpeg二次封装
+ * @author cloudsail
+ * @description 基于jsmpeg二次开发
+ *
  */
 export default class Player {
+  /**
+   * @type {import('../types/player').PlayerOptions}
+   */
+  options
   /** @type {WSSource|AjaxSource|AjaxProgressiveSource} */
   source = null
   /** @type {HTMLCanvasElement} */
@@ -35,15 +43,15 @@ export default class Player {
   recorder = null
   /** 播放器状态 */
   status = {
-    canvasAngle: 0
+    canvasAngle: 0,
+    /** 表示播放器处于后台（不可见状态） */
+    isBackground: false
   }
 
   /** 是否循环播放 */
   loop = false
   /** 是否正在播放 */
   isPlaying = false
-  /** 表示播放器处于后台（不可见状态） */
-  isBackground = false
   get isRecording() {
     return !!this.recorder?.running
   }
@@ -51,6 +59,10 @@ export default class Player {
   get recordingDuration() {
     return this.recorder?.duration
   }
+  /** @type {number} */
+  currentTime
+  /** @type {number} */
+  volume
   /**
    *
    * @param {string} url
@@ -70,10 +82,11 @@ export default class Player {
   /**
    *
    * @param {string} url
-   * @param {import('../types').PlayerOptions} options
+   * @param {import('../types/player').PlayerOptions} options
    */
   init(url, options) {
     this.options = options
+    this.eventBus = this.options.eventBus = new EventBus()
 
     this.initCanvas()
     this.initSource(url)
@@ -84,8 +97,6 @@ export default class Player {
 
     this.demuxer = new Demuxer.TS(options)
     this.source.connect(this.demuxer)
-
-    // this.demuxer.write(new Array(1024).fill(255))
 
     if (!options.disableWebAssembly && WASM.IsSupported()) {
       this.wasmModule = WASM.GetModule()
@@ -210,7 +221,7 @@ export default class Player {
       this.source.changeUrl(url)
     } else {
       this.source.url = url
-      if (!!url && !this.isBackground) {
+      if (!!url && !this.status.isBackground) {
         this.play()
       }
     }
@@ -234,7 +245,7 @@ export default class Player {
 
   /** 进入前台 */
   intoFront() {
-    this.isBackground = false
+    this.status.isBackground = false
     if (this.paused) {
       this.play()
     }
@@ -242,7 +253,7 @@ export default class Player {
 
   /** 进入后台 */
   intoBackground() {
-    this.isBackground = true
+    this.status.isBackground = true
     if (this.options.pauseWhenHidden) {
       this.pause()
     }
@@ -332,7 +343,8 @@ export default class Player {
       this.recorder = new Recorder({
         canvas: this.canvas,
         mode,
-        source: this.source
+        source: this.source,
+        eventBus: this.eventBus
       })
       this.recorder.start()
     } catch (error) {
@@ -361,6 +373,44 @@ export default class Player {
   }
 
   // reload() {}
+
+  // #region 事件
+
+  /**
+   * @template {keyof import("../types/events").JSMpegEventMap} T
+   * @param {T} type
+   * @param {import("../types/events").JSMpegEventMap[T]} callback
+   * @param {AddEventListenerOptions|boolean} options
+   */
+  on(type, callback, options) {
+    this.eventBus.on(type, callback, options)
+  }
+  /**
+   * @template {keyof import("../types/events").JSMpegEventMap} T
+   * @param {T} type
+   * @param {import("../types/events").JSMpegEventMap[T]} callback
+   * @param {AddEventListenerOptions|boolean} options
+   */
+  once(type, callback, options = {}) {
+    this.eventBus.once(type, callback, options)
+  }
+  /**
+   * @template {keyof import("../types/events").JSMpegEventMap} T
+   * @param {T} type
+   * @param {import("../types/events").JSMpegEventMap[T]} callback
+   */
+  off(type, callback) {
+    this.eventBus.off(type, callback)
+  }
+  /**
+   * @template {keyof import("../types/events").JSMpegEventMap} T
+   * @param {T} type
+   * @param {any} data
+   */
+  emit(type, data) {
+    this.eventBus.emit(type, data)
+  }
+  // #endregion
 
   // #region 原生方法
   /**
@@ -417,7 +467,7 @@ export default class Player {
   play() {
     if (this.animationId) {
       return
-    } else if (this.isBackground) {
+    } else if (this.status.isBackground) {
       this.wantsToPlay = true
       return
     }
@@ -457,9 +507,9 @@ export default class Player {
       this.seek(this.currentTime)
     }
 
-    if (this.options.onPause) {
-      this.options.onPause(this)
-    }
+    this.options?.onPause?.(this)
+    this.emit('pause', this)
+
     if (this.recorder?.running) {
       this.recorder.pause()
     }
@@ -479,6 +529,7 @@ export default class Player {
 
   destroy() {
     this.pause()
+    this.eventBus.offAll()
     this.source.destroy()
     this.video && this.video.destroy()
     this.renderer && this.renderer.destroy()
@@ -530,9 +581,8 @@ export default class Player {
       this.isPlaying = true
       this.startTime = Now() - this.currentTime
 
-      if (this.options.onPlay) {
-        this.options.onPlay(this)
-      }
+      this.options?.onPlay?.(this)
+      this.emit('play', this)
     }
     try {
       if (this.options.streaming) {
@@ -627,23 +677,21 @@ export default class Player {
     // continue loading further data.
     this.source.continue(headroom)
 
-    // If we failed to decode and the source is complete, it means we reached
-    // the end of our data. We may want to loop.
     if (notEnoughData && this.source.completed) {
+      // If we failed to decode and the source is complete, it means we reached
+      // the end of our data. We may want to loop.
       if (this.loop) {
         this.seek(0)
       } else {
         this.pause()
-        if (this.options.onEnded) {
-          this.options.onEnded(this)
-        }
+        this.options?.onEnded?.(this)
+        this.emit('ended', this)
       }
-    }
-
-    // If there's not enough data and the source is not completed, we have
-    // just stalled.
-    else if (notEnoughData && this.options.onStalled) {
-      this.options.onStalled(this)
+    } else if (notEnoughData) {
+      // If there's not enough data and the source is not completed, we have
+      // just stalled.
+      this.options?.onStalled?.(this)
+      this.emit('stalled', this)
     }
   }
   // #endregion
@@ -657,7 +705,7 @@ export default class Player {
     this.options.onSourceConnected?.(this)
   }
   handleSourceEstablished() {
-    if (this.isBackground) {
+    if (this.status.isBackground) {
       this.source.pause()
     } else if (this.paused) {
       this.play()

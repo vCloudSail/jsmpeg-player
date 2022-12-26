@@ -1,13 +1,18 @@
 import { download } from '../utils'
+import { EventBus } from '../utils/event-bus'
 
 /*
- * @Author: lcm
+ * @Author: cloudsail
  * @Date: 2022-12-14 16:23:11
- * @LastEditors: lcm
+ * @LastEditors: cloudsail
  * @LastEditTime: 2022-12-14 19:33:39
  * @Description:
  */
 export default class Recorder {
+  /**
+   * @type {EventBus}
+   */
+  eventBus
   /**
    * 录制持续时间(毫秒)
    */
@@ -57,8 +62,9 @@ export default class Recorder {
    * @param {HTMLCanvasElement} param.canvas
    * @param {string} param.mode
    * @param {any} param.source
+   * @param {any} param.eventBus
    */
-  constructor({ canvas, mode = 'auto', source } = {}) {
+  constructor({ canvas, mode = 'auto', source, eventBus } = {}) {
     if (!/^auto|canvas|ws$/.test(mode)) {
       throw new Error('[Recorder] 不支持此录制模式: ' + mode)
     }
@@ -66,9 +72,10 @@ export default class Recorder {
 
     this.canvas = canvas
     this.source = source
+    this.eventBus = eventBus
 
     if (mode === 'auto') {
-      this.mode = window.MediaRecorder ? 'canvas' : 'ws'
+      this.mode = 'ws'
     } else {
       this.mode = mode
     }
@@ -97,6 +104,7 @@ export default class Recorder {
       })
       this.mediaRecorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) {
+          this.eventBus?.emit('recording-data', e.data)
           this.chunks.push(e.data)
         }
       }
@@ -107,6 +115,7 @@ export default class Recorder {
     } else if (this.mode === 'ws') {
       // 服务端转发过来的流就是ffmpeg已转码的ts视频流数据，所以在websocket收到数据的时候，存放到数组中即可实现录制
       this.chunks.write = function (data) {
+        this.eventBus?.emit('recording-data', data)
         this.push(data)
       }
       this.source.recorder = this.chunks
@@ -123,11 +132,13 @@ export default class Recorder {
     this.timer = setInterval(() => {
       if (this.paused) return
 
+      this.eventBus?.emit('recording-tick', this.duration)
       // 对比Date.now()差值的方式比单纯++更加精准
       this.duration = Date.now() - this.startTime
     }, 500)
 
     this.running = true
+    this.eventBus?.emit('recording-start')
   }
   /**
    * 暂停录制
@@ -143,6 +154,7 @@ export default class Recorder {
     }
 
     // this.running = false
+    this.eventBus?.emit('recording-pause')
   }
   /**
    * 继续录制
@@ -157,6 +169,7 @@ export default class Recorder {
     }
 
     // this.running = true
+    this.eventBus?.emit('recording-continue')
   }
   /**
    * 停止录制
@@ -169,13 +182,16 @@ export default class Recorder {
     }
 
     saveName && this.save(saveName)
+
+    this.running = false
+    this.eventBus?.emit('recording-end')
   }
   /**
    * 保存
    * @returns
    */
   save(name = 'jsmpeg') {
-    if (!this.running || !this.chunks) return
+    if (!this.chunks) return
 
     let outputName = `${name}_录制_${new Date().toLocaleTimeString()}`
 

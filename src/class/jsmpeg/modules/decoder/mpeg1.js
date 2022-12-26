@@ -69,9 +69,9 @@ export default class MPEG1 extends BaseDecoder {
     this.advanceDecodedTime(1 / this.frameRate)
 
     let elapsedTime = Now() - startTime
-    if (this.onDecodeCallback) {
-      this.onDecodeCallback(this, elapsedTime)
-    }
+    this.onDecodeCallback?.(this, elapsedTime)
+    this.eventBus?.emit('video-decode', this, elapsedTime)
+
     return true
   }
 
@@ -108,7 +108,15 @@ export default class MPEG1 extends BaseDecoder {
         this.destination.resize(newWidth, newHeight)
         this.resolution.width = w
         this.resolution.height = h
-        this.options.onResolutionDecode?.(newWidth, newHeight)
+
+        this.options.onResolutionDecode?.(this, {
+          width: newWidth,
+          height: newHeight
+        })
+        this.eventBus?.emit('resolution-decode', this, {
+          width: newWidth,
+          height: newHeight
+        })
       }
     }
 
