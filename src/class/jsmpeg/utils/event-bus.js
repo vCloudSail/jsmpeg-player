@@ -1,3 +1,10 @@
+/*
+ * @Author: lcm
+ * @Date: 2022-12-27 10:48:00
+ * @LastEditors: lcm
+ * @LastEditTime: 2022-12-27 17:24:02
+ * @Description:
+ */
 export class EventBus extends EventTarget {
   eventMap = {}
   constructor() {
@@ -29,8 +36,8 @@ export class EventBus extends EventTarget {
       this.eventMap[type].push({ callback })
     }
 
-    const wrapCallback = () => {
-      callback?.()
+    const wrapCallback = (/** @type {CustomEvent} */ ev) => {
+      callback?.(...ev.detail)
       if (options?.once) {
         this._removeEvent(type, callback)
       }

@@ -81,16 +81,12 @@
         :title="paused ? '播放' : '暂停'"
         @click="handleToolbar('play')"
       ></button>
-      <contextmenu class="toolbar-item">
-        <button
-          slot="reference"
-          class="stop-btn jm-icon-stop"
-          title="停止"
-          type="button"
-          @click="handleToolbar('stop')"
-        ></button>
-        <div slot="menu-item">asdasdasd</div>
-      </contextmenu>
+      <button
+        class="toolbar-item stop-btn jm-icon-stop"
+        title="停止"
+        type="button"
+        @click="handleToolbar('stop')"
+      ></button>
       <button
         class="toolbar-item volume-btn"
         type="button"
@@ -249,9 +245,8 @@
 import JSMpeg from './class/jsmpeg'
 import fullscreen from './class/jsmpeg/utils/fullscreen'
 import { formatTimestamp } from './class/jsmpeg/utils'
-import vLoading from './directives/loading'
 import Loading from './components/loading.vue'
-import Contextmenu from './components/contextmenu.vue'
+// import Contextmenu from './components/contextmenu.vue'
 
 const defaultOptions = () => ({
   /** 是否循环播放视频(仅静态文件)。默认true */
@@ -330,8 +325,8 @@ export default {
       default: '拼命加载中'
     }
   },
-  directives: { vLoading },
-  components: { Loading, Contextmenu },
+  directives: {},
+  components: { Loading },
   inject: {
     /** @returns {any} */
     rootTabs: {
@@ -436,7 +431,7 @@ export default {
     },
     /** @returns {string} */
     recordingDurationLabel() {
-      return formatTimestamp(this.playerStatus.recordingDuration)
+      return formatTimestamp(this.playerStatus.recordingDuration * 1000)
     },
     /** @returns {boolean} */
     showCloseBtn() {
@@ -508,7 +503,7 @@ export default {
       if (this.player) {
         this.playerStatus.currentTime = this.player.currentTime
       }
-    }, 1000)
+    }, 500)
   },
   beforeDestroy() {
     if (this.syncTimer) {
@@ -532,140 +527,126 @@ export default {
         ...this.options
       })
       this.$emit('player-loaded', player)
+      let events = Object.keys(this.$listeners)
 
+      for (let event of events) {
+        player.on(event, () => {
+          this.$emit(event, ...arguments)
+        })
+      }
       // #region 原生事件
-      player.on('video-decode', ({ detail = [] } = {}) => {
-        // console.log('[JSMpegPlayer] 事件触发 -> 视频帧解码')
+      // player.on('video-decode', () => {
+      //   // console.log('[JSMpegPlayer] 事件触发 -> 视频帧解码')
 
-        // this.playerStatus.currentTime = player.currentTime
-        this.$emit('video-decode', ...detail)
-      })
-      player.on('audio-decode', ({ detail = [] } = {}) => {
-        // console.log('[JSMpegPlayer] 事件触发 -> 音频帧解码')
+      // })
+      // player.on('audio-decode', () => {
+      //   // console.log('[JSMpegPlayer] 事件触发 -> 音频帧解码')
 
-        this.$emit('audio-decode', ...detail)
-      })
-      player.on('play', ({ detail = [] } = {}) => {
+      // })
+      player.on('play', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 播放开始')
 
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
         this.loading = false
-        this.$emit('play', player)
       })
-      player.on('pause', ({ detail = [] } = {}) => {
+      player.on('pause', (arg) => {
         console.log('[JSMpegPlayer] 事件触发 -> 播放暂停')
 
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
         this.loading = false
         console.log('onPause')
-        this.$emit('pause', player)
       })
-      player.on('stalled', ({ detail = [] } = {}) => {
+      player.on('stalled', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 播放停滞')
 
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
-        this.$emit('stalled', player)
       })
-      player.on('ended', ({ detail = [] } = {}) => {
+      player.on('ended', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 播放结束')
 
         this.playerStatus.currentTime = player.currentTime
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
-        this.$emit('ended', player)
       })
-      player.on('source-established', ({ detail = [] } = {}) => {
+      player.on('source-established', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源通道建立')
 
         this.playerStatus.noSignal = false
         this.loading = false
         clearTimeout(this.timers.noSignal)
         this.timers.noSignal = null
-
-        this.$emit('source-established', ...detail)
       })
-      player.on('source-completed', ({ detail = [] } = {}) => {
-        console.log('[JSMpegPlayer] 事件触发 -> 源播放完成')
+      // player.on('source-completed', () => {
+      //   console.log('[JSMpegPlayer] 事件触发 -> 源播放完成')
 
-        console.log('onSourceCompleted')
-        this.$emit('source-completed', ...detail)
-      })
+      //   console.log('onSourceCompleted')
+      //   this.$emit('source-completed', ...arguments)
+      // })
       // #endregion
 
       // #region 扩展事件
-      player.on('resolution-decode', ({ detail = [] } = {}) => {
+      player.on('resolution-decode', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 分辨率解码')
 
         this.playerStatus.gotResolution = true
         this.settingPlayer('autoStretch', this.playerSettings.autoStretch)
-        this.$emit('resolution-decode', ...detail)
       })
 
       // #region 录制相关
-      player.on('recording-start', ({ detail = [] } = {}) => {
+      player.on('recording-start', () => {
         // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
 
         this.playerStatus.recording = player.recorder.running
-        this.$emit('recording-start', ...detail)
       })
-      player.on('recording-pause', ({ detail = [] } = {}) => {
+      player.on('recording-pause', () => {
         // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
-        this.$emit('recording-pause', ...detail)
       })
-      player.on('recording-continue', ({ detail = [] } = {}) => {
+      player.on('recording-continue', () => {
         // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
-        this.$emit('recording-continue', ...detail)
       })
-      player.on('recording-end', ({ detail = [] } = {}) => {
+      player.on('recording-end', () => {
         // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
         this.playerStatus.recording = player.recorder.running
-        this.$emit('recording-end', ...detail)
       })
-      player.on('recording-tick', ({ detail = [] } = {}) => {
+      player.on('recording-tick', () => {
         // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
         this.playerStatus.recordingDuration = player.recorder.duration
-        this.$emit('recording-tick', ...detail)
       })
-      player.on('recording-data', ({ detail = [] } = {}) => {
+      player.on('recording-data', () => {
         // console.log('[JSMpegPlayer] 事件触发 -> 录制器tick')
-        this.$emit('recording-data', ...detail)
       })
       // #endregion
 
-      player.on('source-connected', ({ detail = [] } = {}) => {
+      player.on('source-connected', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源连接')
 
         clearTimeout(this.timers.noSignal)
         this.loading = true
         this.playerStatus.noSignal = false
-        this.$emit('source-connected', ...detail)
       })
-      player.on('source-interrupt', ({ detail = [] } = {}) => {
+      player.on('source-interrupt', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源传输中断')
 
         this.loading = true
         clearTimeout(this.timers.noSignal)
 
         this.timers.noSignal = setTimeout(this.handleNoSignal, 15000)
-        this.$emit('source-interrupt', ...detail)
       })
-      player.on('source-continue', ({ detail = [] } = {}) => {
+      player.on('source-continue', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源传输恢复/继续')
 
         clearTimeout(this.timers.noSignal)
         this.timers.noSignal = null
         this.loading = false
         this.playerStatus.noSignal = false
-        this.$emit('source-continue', ...detail)
       })
-      player.on('source-closed', ({ detail = [] } = {}) => {
+      player.on('source-closed', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源关闭')
 
         clearTimeout(this.timers.noSignal)
-        this.$emit('source-closed', ...detail)
         this.handleNoSignal()
       })
       // #endregion

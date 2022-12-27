@@ -1,5 +1,6 @@
 @import './icon/index.css';
 @import './popover.scss';
+@import './keyframes.scss';
 
 .jsmpeg-player {
   width: 100%;
@@ -64,11 +65,6 @@
       font-weight: bold;
       letter-spacing: 1px;
 
-      @keyframes breathing {
-        50% {
-          opacity: 0;
-        }
-      }
 
       .recording-icon {
         width: 10px;
@@ -135,6 +131,13 @@
 
         .loading-text {
           margin-top: 10px;
+
+          &::after {
+            display: inline-block;
+            content: '';
+            animation: omission 2s ease-in-out infinite;
+          }
+
         }
       }
     }

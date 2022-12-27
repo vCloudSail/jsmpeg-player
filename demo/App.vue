@@ -15,7 +15,15 @@
         </el-button>
         <el-button @click="url = tempUrl = demoUrl">重置</el-button>
       </el-row>
-      <el-row class="current-time"> 延迟测试：{{ currTime }} </el-row>
+      <el-row class="current-time">
+        延迟测试：{{ currTime }}
+        <el-button
+          @click="toggleTimerStatus"
+          style="margin-left: 10px"
+        >
+          {{ timer.running ? '暂停' : '继续' }}
+        </el-button>
+      </el-row>
     </div>
     <div class="main"> <jsmpeg-player :url="url" /></div>
   </div>
@@ -29,13 +37,29 @@ const demoUrl = 'ws://localhost:8891'
 class Timer {
   _startTime = null
   time = 0
+  running = false
   start() {
     this._startTime = Date.now()
+    this.running = true
+    this.timer = setInterval(() => {
+      this.time = Date.now() - this._startTime
+    }, 5)
+  }
+  pause() {
+    this.running = false
+    this._pauseTime = Date.now()
+    clearInterval(this.timer)
+  }
+  continue() {
+    this.running = true
+    this._startTime += Date.now() - this._pauseTime
+    this._pauseTime = null
     this.timer = setInterval(() => {
       this.time = Date.now() - this._startTime
     }, 5)
   }
   stop() {
+    this.running = false
     this._startTime = null
     this.time = 0
     clearInterval(this.timer)
@@ -72,7 +96,14 @@ export default {
     this.timer.stop()
   },
   // #endregion
-  methods: {}
+  methods: {
+    toggleTimerStatus() {
+      if (this.timer.running) {
+        return this.timer.pause()
+      }
+      this.timer.continue()
+    }
+  }
 }
 </script>
 

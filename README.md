@@ -1,23 +1,35 @@
 # jsmpeg-player
 
-# 介绍
-基于[jsmpeg.js](https://github.com/phoboslab/jsmpeg)二次开发的vue组件，欢迎各位一起维护
-- **仅支持mpeg1格式视频、mp2格式音频！！！仅支持mpeg1格式视频、mp2格式音频！！！仅支持mpeg1格式视频、mp2格式音频！！！**
+## 介绍
+本组件是基于[jsmpeg.js](https://github.com/phoboslab/jsmpeg)二次开发的vue组件
+
+- **（注意!）无法直接播放rtmp流，支持的音视频格式为：mpeg1(视频)\mp2(音频)**
 - web播放实时视频流的几种方案对比，详见[此处](https://blog.csdn.net/a843334549/article/details/117319350)
-- 详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
-- jsmpeg.js项目地址：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)
-- [jsmpeg官网](https://jsmpeg.com/)
-- 关于延迟问题，在局域网下实测1s左右，但在公网下需要考虑带宽问题
+- 本方案详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
+- jsmpeg.js相关链接：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)、[官网](https://jsmpeg.com/)
+- 关于延迟问题，仅在局域网\本机下实测1s左右，在公网下未知，公网要考虑的东西太多(带宽、丢包、流量)，公网下的流媒体服务框架这里推荐[ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit)
+- jsmpeg采用软解码方式，对客户端硬件有一定的性能要求
+- 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
+- 本组件不适用于大型项目
+## 方案架构
 
-# 软件架构
-
-rtsp流=>ffmpeg转码=>http server接收=>websocket server转发=>websocket client
+rtsp流 => ffmpeg转码 => http server接收 => websocket server转发 => websocket client => 客户端软解码渲染
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2a11509af2b64ee08608518017a7bfad.png)
 
-PS: 如果是公网，需要自行解决如何拉取摄像头rtsp流
+ffmpeg推流命令示例：
+```shell
+ffmpeg ^
+-rtsp_transport tcp -i rtsp://[用户名]:[密码]@[ip]:554/h264/ch1/main/av_stream -q 0 ^
+-f mpegts ^
+-codec:v mpeg1video -s 1920x1080 -b:v 1500k ^
+-codec:a mp2 -ar 44100 -ac 1 -b:a 128k ^
+http://127.0.0.1:8890/jsmpeg
+```
 
-# 安装教程
+PS: 如果是公网，需要自行解决拉取摄像头rtsp流
+
+## 安装教程
 本组件使用了element-ui部分组件（后续有空了考虑剔除）以及ES6+语法，要求如下：
 - element-ui>2.15.1
 - vue>2.6.1
@@ -99,9 +111,9 @@ export default {
 
 ```
 
-# 使用说明
+## 使用说明
 
-## 属性 & Props：
+### 属性 & Props：
 
 | 名称           | 类型    | 说明                                                                         |
 | -------------- | ------- | ---------------------------------------------------------------------------- |
@@ -138,7 +150,7 @@ export default {
 | videoBufferSize       | number            | 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。                                |
 | audioBufferSize       | number            | 流媒体时，音频解码缓冲区的字节大小。默认的128 * 1024 (128 kb)。对于非常高的比特率，您可能需要增加此值。                                |
 
-##  事件 & Emits：
+###  事件 & Emits：
 
 支持jsmpeg.js所有原生事件，并转换为短横线命名法，[jsmpeg官方文档 - 事件](https://github.com/phoboslab/jsmpeg#usage)
 
@@ -163,14 +175,15 @@ export default {
 | source-closed      | -                       | -                        | 源关闭事件（仅websocket），当websocket关闭后触发                                                 |
 | resolution-decode  | -                       | decoder, {width, height} | 分辨率解码事件，当获取到视频分辨率时触发发                                                       |
 
-## 插槽 & Slot:
+### 插槽 & Slot:
 | 名称      | 参数 | 说明                                             |
 | --------- | ---- | ------------------------------------------------ |
 | title     | 无   | 标题插槽，使用此插槽后title属性失效              |
+| loading   | 无   | loading插槽，可自定义加载效果         |
 | no-signal | 无   | 无信号时的插槽，使用此插槽后noSignalText属性失效 |
 
-## 功能 & 计划
-### 功能
+### 功能 & 计划
+
 - [x] 自动重连
 - [x] 接流中断loading
 - [x] 截图
@@ -178,44 +191,35 @@ export default {
 - [x] 画面旋转
 - [x] 全屏切换
 - [x] 全屏切换
+- [x] 事件总线
 - [ ] 多播放器同屏显示
 - [ ] 国际化
 - [ ] 剔除element-ui的依赖，自行实现部分组件
 - [ ] 画中画显示(原生只支持video元素画中画显示，目前还没想到方案)
-- [ ] 已知的性能问题(在data中定义了player，导致被双向绑定)
-### 计划
-
-**v1.0.2-beta**
-- [x] 抽离录制器
+- [x] 已知的性能问题(在data中定义了player，导致被双向绑定)
 
 
 ## 效果演示
 
-无信号时：
-
+- 无信号时：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/cae1fbb2d8c74193b834651a767dad02.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
-正常播放：
-
+- 正常播放：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/fe266d7592754a1fa174419694e4fd95.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
-旋转：
-
+- 旋转画面：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/692e974957394a79a76f336ee5e82c56.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
-接流中断：
-
+- 接流中断：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/0c5a6646236440f4a863654b09f28389.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
-截图测试：
-
+- 截图测试：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/cc9ad53dcd3b4dd8bd69dd2b9c2c247f.gif)
 
-录制测试：
-
+- 录制测试：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/d95d0987763546fbb4a5a4107b919f50.gif)
 
-# 运行DEMO
+## 运行DEMO
 
 1. 拉取git仓库
 2. 运行cmd: npm i
@@ -226,7 +230,7 @@ ffmpeg拉取桌面流见此文章：https://waitwut.info/blog/2013/06/09/desktop
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f977c4e6f0434e03a0eb8ea287b55e23.png)
 
-# 参与贡献
+## 参与贡献
 1. Fork 本仓库
 2. 新建 Feat_xxx 分支
 3. 提交代码

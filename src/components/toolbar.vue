@@ -183,7 +183,12 @@ export default {
   data() {
     return {}
   },
-  computed: {},
+  computed: {
+    /** @returns {string} */
+    currentTimeLabel() {
+      return formatTimestamp(this.playerStatus.currentTime * 1000)
+    }
+  },
   watch: {},
   // #endregion
 

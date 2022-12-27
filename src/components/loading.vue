@@ -12,13 +12,12 @@ export default {
   // #region 组件基础
   components: {},
   props: {
-    show: Boolean,
     text: String
   },
   // #endregion
 
   render(h, context) {
-    const { show, text } = context.props
+    const { text } = context.props
 
     return [
       <svg

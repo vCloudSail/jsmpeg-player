@@ -1,11 +1,11 @@
-import { download } from '../utils'
+import { download, Now } from '../utils'
 import { EventBus } from '../utils/event-bus'
 
 /*
  * @Author: cloudsail
  * @Date: 2022-12-14 16:23:11
- * @LastEditors: cloudsail
- * @LastEditTime: 2022-12-14 19:33:39
+ * @LastEditors: lcm
+ * @LastEditTime: 2022-12-28 14:59:51
  * @Description:
  */
 export default class Recorder {
@@ -128,13 +128,13 @@ export default class Recorder {
     // 计时器
     this.paused = false
 
-    this.startTime = Date.now()
+    this.startTime = Now()
     this.timer = setInterval(() => {
       if (this.paused) return
 
       this.eventBus?.emit('recording-tick', this.duration)
       // 对比Date.now()差值的方式比单纯++更加精准
-      this.duration = Date.now() - this.startTime
+      this.duration = Now() - this.startTime
     }, 500)
 
     this.running = true
@@ -145,9 +145,10 @@ export default class Recorder {
    * PS：暂停后running还是为true
    */
   pause() {
+    this.pauseTime = Now()
     this.paused = true
     if (this.mediaRecorder) {
-      this.mediaRecorder.pause()
+      this.mediaRecorder.pause(this.pauseTime)
     }
     if (this.source) {
       this.source.recorder = null
@@ -160,6 +161,12 @@ export default class Recorder {
    * 继续录制
    */
   continue() {
+    let now = Now(),
+      offsetTime = now - this.pauseTime
+
+    this.pauseTime = null
+    this.startTime += offsetTime
+
     this.paused = false
     if (this.mediaRecorder) {
       this.mediaRecorder.resume()
@@ -184,7 +191,7 @@ export default class Recorder {
     saveName && this.save(saveName)
 
     this.running = false
-    this.eventBus?.emit('recording-end')
+    this.eventBus?.emit('recording-end', this.chunks)
   }
   /**
    * 保存
