@@ -16,7 +16,7 @@
   "scripts": {
     "dev": "vue-cli-service serve",
     "dev:full": "npm run simple-server && vue-cli-service serve",
-    "build": "vue-cli-service build --report --target lib --name jsmpeg-player",
+    "build": "vue-cli-service build --report --target lib --name jsmpeg-player src/index.js",
     "build:demo": "vue-cli-service build --report",
     "lint": "vue-cli-service lint",
     "simple-server": "cd simple-server && call start.bat",
