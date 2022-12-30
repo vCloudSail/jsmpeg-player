@@ -15,6 +15,7 @@ examples/
 packages/
 public/
 src/
+demo/
 simple-server/
 
 .eslintrc.js

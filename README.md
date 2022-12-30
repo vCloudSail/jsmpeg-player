@@ -10,10 +10,11 @@
 - 关于延迟问题，仅在局域网\本机下实测1s左右，在公网下未知，公网要考虑的东西太多(带宽、丢包、流量)，公网下的流媒体服务框架这里推荐[ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit)
 - jsmpeg采用软解码方式，对客户端硬件有一定的性能要求
 - 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
-- 本组件不适用于大型项目
+- 存在性能瓶颈，本组件可能不适用于大型项目
+
 ## 方案架构
 
-rtsp流 => ffmpeg转码 => http server接收 => websocket server转发 => websocket client => 客户端软解码渲染
+**rtsp流 => ffmpeg转码 => http server接收 => websocket server转发 => websocket client => 客户端软解码渲染**
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2a11509af2b64ee08608518017a7bfad.png)
 
@@ -27,7 +28,9 @@ ffmpeg ^
 http://127.0.0.1:8890/jsmpeg
 ```
 
-PS: 如果是公网，需要自行解决拉取摄像头rtsp流
+PS: 
+- 如果是公网，需要自行解决拉取摄像头rtsp流
+- 本组件仅实现了前端（客户端）部分的功能，需自行实现后端部分的功能
 
 ## 安装教程
 本组件使用了element-ui部分组件（后续有空了考虑剔除）以及ES6+语法，要求如下：
@@ -126,7 +129,7 @@ export default {
 | show-duration  | boolean | 是否现实持续播放时间                                                         |
 | default-mute   | boolean | 默认静音                                                                     |
 | with-toolbar   | boolean | 是否需要工具栏                                                               |
-| loading-text   | boolean | 加载时的文本，默认为：拼命加载中...                                          |
+| loading-text   | boolean | 加载时的文本，默认为：拼命加载中                                          |
 
 **原生属性：**
 
