@@ -3,7 +3,6 @@
 ## 介绍
 本组件是基于[jsmpeg.js](https://github.com/phoboslab/jsmpeg)二次开发的vue组件
 
-- **（注意!）无法直接播放rtmp流，支持的音视频格式为：mpeg1(视频)\mp2(音频)**
 - web播放实时视频流的几种方案对比，详见[此处](https://blog.csdn.net/a843334549/article/details/117319350)
 - 本方案详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
 - jsmpeg.js相关链接：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)、[官网](https://jsmpeg.com/)
@@ -11,6 +10,16 @@
 - jsmpeg采用软解码方式，对客户端硬件有一定的性能要求
 - 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
 - 存在性能瓶颈，本组件可能不适用于大型项目
+- 交流QQ群：56370082（请备注来源）
+  
+### 支持的格式
+- 视频：mpeg1
+- 音频：mp2
+
+### 组件仓库/npm地址
+- [giee](https://gitee.com/vCloudsail/jsmpeg-player)
+- [github](https://github.com/vCloudSail/jsmpeg-player)
+- [npm](https://www.npmjs.com/package/vue-jsmpeg-player?activeTab=readme)
 
 ## 方案架构
 
