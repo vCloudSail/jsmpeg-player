@@ -43,7 +43,7 @@ module.exports = defineConfig({
       config.devtool('cheap-module-source-map')
     })
 
-    config.when(process.env.NODE_ENV === 'production', (config) => {
+    config.when(isProduction, (config) => {
       // 移除console
       // https://www.cnblogs.com/WNpursue/p/13745831.html
       config.optimization.minimizer('terser').tap((options) => {

@@ -214,21 +214,27 @@ export default {
 ## 效果演示
 
 - 无信号时：
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/cae1fbb2d8c74193b834651a767dad02.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
 - 正常播放：
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/fe266d7592754a1fa174419694e4fd95.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
 - 旋转画面：
+  
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/692e974957394a79a76f336ee5e82c56.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
 - 接流中断：
+  
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/0c5a6646236440f4a863654b09f28389.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5LqR5biGUGxhbg==,size_20,color_FFFFFF,t_70,g_se,x_16)
 
 - 截图测试：
+  
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/cc9ad53dcd3b4dd8bd69dd2b9c2c247f.gif)
 
 - 录制测试：
+  
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/d95d0987763546fbb4a5a4107b919f50.gif)
 
 ## 运行DEMO

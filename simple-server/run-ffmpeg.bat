@@ -8,5 +8,3 @@ call ffmpeg ^
 -codec:v mpeg1video -s 1920x1080 -b:v 1500k ^
 -codec:a mp2 -ar 44100 -ac 1 -b:a 128k ^
 http://127.0.0.1:8890/jsmpeg
-
-

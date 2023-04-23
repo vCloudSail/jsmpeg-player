@@ -1,2 +1,2 @@
 echo off
-call node ./websocket-relay.js jsmpeg 8890 8891
+call node websocket-relay.js jsmpeg 8890 8891
