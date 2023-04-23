@@ -22,8 +22,10 @@
     "simple-server": "cd simple-server && call start.bat",
     "clear": "rimraf .eslintcache && rimraf package-lock.json && rimraf yarn.lock && rimraf pnpm-lock.yaml && rimraf node_modules",
     "reinstall": "npm run clear && yarn",
-    "deploy": "npm config set registry https://registry.npmjs.org && npm run build && timeout /t 2 nobreak && npm publish && npm config set registry https://registry.npm.taobao.org",
-    "taobao": "npm config set registry https://registry.npm.taobao.org"
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
     "core-js": "^3.24.1"
