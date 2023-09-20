@@ -63,8 +63,8 @@
           <slot name="no-signal" />
         </template>
         <template v-else>
-          <div class="no-signal-text"> {{ noSignalText }} </div></template
-        >
+          <div class="no-signal-text"> {{ noSignalText }} </div>
+        </template>
       </template>
     </div>
     <div
@@ -242,9 +242,10 @@
 </template>
 
 <script>
-import JSMpeg from './class/jsmpeg'
-import fullscreen from './class/jsmpeg/utils/fullscreen'
-import { formatTimestamp } from './class/jsmpeg/utils'
+import JSMpeg from '@cloudsail/jsmpeg/index'
+import fullscreen from '@cloudsail/jsmpeg/utils/fullscreen'
+import { formatTimestamp } from '@cloudsail/jsmpeg/utils'
+
 import Loading from './components/loading.vue'
 // import Contextmenu from './components/contextmenu.vue'
 
@@ -338,6 +339,13 @@ export default {
       player: this
     }
   },
+  emits: [
+    'no-signal',
+    'muted',
+    'close',
+    'volume-change',
+    'update:inBackground'
+  ],
   // #endregion
 
   // #region 数据相关
@@ -759,7 +767,7 @@ export default {
     },
     toggleRecording() {
       if (this.player?.isRecording) {
-        this.player?.stopRecording(this.title)
+        this.player?.stopRecording(this.title || this.url)
       } else {
         this.player?.startRecording('auto')
       }

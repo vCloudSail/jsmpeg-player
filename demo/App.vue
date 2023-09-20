@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { formatTimestamp } from '@/class/jsmpeg/utils'
+import { formatTimestamp } from '@cloudsail/jsmpeg/utils'
 
 const demoUrl = 'ws://localhost:8891'
 
@@ -138,7 +138,7 @@ body {
   }
   .main {
     flex: 1;
-    padding: 60px;
+    padding: 30px;
   }
 }
 </style>

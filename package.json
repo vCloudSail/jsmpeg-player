@@ -1,11 +1,22 @@
 {
   "name": "vue-jsmpeg-player",
   "version": "1.1.0-beta",
-  "description": "基于jsmpeg.js开发的流媒体播放器",
-  "license": "MIT",
-  "main": "dist/jsmpeg-player.umd.min.js",
+  "description": "基于jsmpeg.js二次开发的流媒体播放器",
   "private": false,
   "author": "云帆 <cloudsail.studio@outlook.com>",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.,js",
+  "types": "./index.d.ts",
+  "exports": {
+    "types": "./index.d.ts",
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vCloudSail/jsmpeg-player"
@@ -14,45 +25,52 @@
     "url": "https://github.com/vCloudSail/jsmpeg-player/issues"
   },
   "scripts": {
-    "dev": "vue-cli-service serve",
-    "dev:full": "npm run simple-server && vue-cli-service serve",
-    "build": "vue-cli-service build --report --target lib --name jsmpeg-player src/index.js",
-    "build:demo": "vue-cli-service build --report",
+    "dev": "vite",
+    "dev:full": "npm run server && npm run dev",
+    "build": "vite build",
+    "server": "cd server && call start.bat",
     "lint": "vue-cli-service lint",
-    "simple-server": "cd simple-server && call start.bat",
     "clear": "rimraf .eslintcache && rimraf package-lock.json && rimraf yarn.lock && rimraf pnpm-lock.yaml && rimraf node_modules",
     "reinstall": "npm run clear && yarn",
     "prepublishOnly": "npm run build"
   },
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
     "core-js": "^3.24.1"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "7.12.16",
-    "@vue/cli-plugin-babel": "^5.0.0",
-    "@vue/cli-plugin-eslint": "^5.0.0",
-    "@vue/cli-service": "^5.0.0",
-    "babel-plugin-component": "^1.1.1",
-    "element-ui": "2.15.6",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-vue": "^8.0.3",
-    "lint-staged": "^11.1.2",
-    "prettier": "^2.7.1",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rushstack/eslint-patch": "^1.2.0",
+    "@vitejs/plugin-vue2": "^2.2.0",
+    "@vitejs/plugin-vue2-jsx": "^1.1.0",
+    "@vue/eslint-config-prettier": "^7.1.0",
+    "@vue/test-utils": "^1.3.4",
+    "autoprefixer": "^10.4.14",
+    "element-ui": "^2.15.0",
+    "eslint": "^8.34.0",
+    "eslint-plugin-vue": "^9.9.0",
+    "jsdom": "^21.1.0",
+    "postcss": "^8.4.21",
+    "prettier": "^2.8.4",
     "rimraf": "^3.0.2",
-    "sass": "1.32.6",
-    "sass-loader": "10.0.3",
-    "vue": "2.7.8",
-    "vue-template-compiler": "2.7.8"
+    "rollup-plugin-visualizer": "^5.9.0",
+    "sass": "~1.32.13",
+    "terser": "^5.19.2",
+    "unplugin-vue-components": "^0.25.0",
+    "vconsole": "^3.15.0",
+    "vite": "^4.3.5",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-require-transform": "^1.0.9",
+    "vitest": "^0.29.1",
+    "vue": "^2.7.0"
   },
   "peerDependencies": {
-    "vue": "^2.6.14",
-    "element-ui": "^2.15.0",
-    "core-js": "^3.0.0"
+    "core-js": "^3.0.0",
+    "element-ui": "^2.15.6",
+    "vue": "^2.7.0"
   },
   "browserslist": [
     "> 1%",
@@ -74,9 +92,6 @@
   "engines": {
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
   },
   "lint-staged": {
     "*.{js,jsx,vue,css}": [

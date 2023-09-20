@@ -3,6 +3,7 @@ node_modules
 /dist
 /package-lock.json
 /pnpm-lock.yaml
+/report.html
 
 # local env files
 .env.local

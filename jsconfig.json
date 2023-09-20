@@ -1,18 +1,26 @@
 {
   "compilerOptions": {
-    "target": "esnext", // 用来指定 ES 版本 ESNext : 最新版
-    "module": "esnext", // 指定要使用模块化的规范 
-    "baseUrl": "./",
-    "moduleResolution": "node",
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@cloudsail/jsmpeg/*": [
+        "src/jsmpeg/src/*"
       ]
     },
+    "target": "esnext", // 用来指定 ES 版本 ESNext : 最新版
+    "module": "esnext", // 指定要使用模块化的规范 
+    "baseUrl": ".",
+    "outDir": "./dist", // 用来指定编译后文件的存放位置
+    "sourceMap": true, // 是否生成sourceMap，默认false  这个文件里保存的，是转换后代码的位置，和对应的转换前的位置。有了它，出错的时候，通过断点工具可以直接显示原始代码，而不是转换后的代码。
+    "strict": true, // 所有的严格检查的总开关，默认false
+    "jsx": "preserve",
     "importHelpers": true,
+    "moduleResolution": "node",
     "skipLibCheck": true, // 跳过.d.ts文件检查
     "esModuleInterop": true,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true, // 允许没有默认导出的模块
   },
   "exclude": [
     "node_modules",

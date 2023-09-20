@@ -135,8 +135,8 @@ export default {
 | options        | object  | jsmpeg原生选项，直接透传，详见下表                                           |
 | closeable      | boolean | 是否可关闭（单击关闭按钮，仅抛出事件）                                       |
 | in-background  | boolean | 是否处于后台，如el-tabs的切换，路由的切换等，支持.sync修饰符                 |
-| show-duration  | boolean | 是否现实持续播放时间                                                         |
-| default-mute   | boolean | 默认静音                                                                     |
+| show-duration  | boolean | 是否显示持续播放时间                                                         |
+| default-muted   | boolean | 默认静音                                                                     |
 | with-toolbar   | boolean | 是否需要工具栏                                                               |
 | loading-text   | boolean | 加载时的文本，默认为：拼命加载中                                          |
 
@@ -243,6 +243,9 @@ export default {
 2. 运行cmd: npm i
 3. 运行cmd: npm run dev:full
 4. 会分别弹出两个命令行窗口，一个是ffmpeg转码，一个是中转服务器
+5. 查看demo
+
+**注意：ffmpeg默认拉取桌面流，如果要测试其他rtsp流请自行修改server/run-ffmpeg.bat文件的ffmpeg代码**
 
 ffmpeg拉取桌面流见此文章：https://waitwut.info/blog/2013/06/09/desktop-streaming-with-ffmpeg-for-lower-latency/
 
