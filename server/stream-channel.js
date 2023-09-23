@@ -16,6 +16,10 @@ class StreamChannel {
   /** @type {http.IncomingMessage} */
   incomingMessage = null
   serverOptions = {}
+  ffmpegOptions = {
+    outputResolution: '1920x1080',
+    outputRate: '1500K'
+  }
   timers = {
     /** 丢失最后一个客户端 */
     lostLastClient: null,
@@ -24,16 +28,18 @@ class StreamChannel {
     /** */
     notReceivedFromStream: null
   }
-  constructor({ name, source } = {}, serverOptions) {
+  constructor({ name, source, resolution, rate } = {}, serverOptions) {
     this.name = name
     this.source = source
+    this.ffmpegOptions.outputRate = rate || '1500K'
+    this.ffmpegOptions.outputResolution = resolution || '1920x1080'
     this.serverOptions = serverOptions
 
     if (this.name === 'desktop' || this.source) {
       this.start()
     }
   }
-  broadcast(data) {
+  async broadcast(data) {
     try {
       for (let client of this.clients) {
         if (client.readyState === WebSocket.OPEN) {
@@ -49,15 +55,6 @@ class StreamChannel {
     //   this.recording.write(data)
     // }
   }
-  #onStreamInterrupt() {
-    this.timers.notReceivedFromStream = null
-    this.log('超过10秒未收到推流端数据，重启ffmpeg进程')
-    this.restart()
-  }
-  #onLastClientLost() {
-    this.timers.lostLastClient = null
-    this.stop()
-  }
   /**
    *
    * @param {import('http').IncomingMessage} request
@@ -72,14 +69,13 @@ class StreamChannel {
         clearTimeout(this.timers.notReceivedFromStream)
         this.timers.notReceivedFromStream = null
       }
-      this.timers.notReceivedFromStream = setTimeout(
-        this.#onStreamInterrupt,
-        10 * 1000
-      )
+      this.timers.notReceivedFromStream = setTimeout(() => {
+        this.#onStreamInterrupt()
+      }, 10 * 1000)
     })
     this.incomingMessage.on('end', () => {
       this.incomingMessage = null
-      console.log(`通道[${this.name}]推流端断开连接`)
+      this.log(`推流端断开连接`)
       // if (request.socket.recording) {
       //   request.socket.recording.close()
       // }
@@ -118,7 +114,6 @@ class StreamChannel {
 
     if (this.clients.length === 0) {
       // 当最后一个客户端连接断开后30秒内无任何客户端接入时，停止推流
-
       this.log('最后一个客户端连接断开，倒计时30秒内无任何客户端接入将停止推流')
       this.timers.lostLastClient = setTimeout(this.#onLastClientLost, 30 * 1000)
     }
@@ -138,76 +133,87 @@ class StreamChannel {
     msg && console.log(`通道[${this.name}]`, msg)
   }
   start() {
-    if (this.status === 'running') {
+    if (this.status === 'running' || this.status === 'starting') {
       return
     }
+    try {
+      this.status = 'starting'
 
-    let source = ''
+      let source = ''
 
-    if (this.name === 'desktop' && !this.source) {
-      /**
-       * -f参数说明
-       * x11grab  指定输入格式为X11抓取
-       * gdigrab
-       */
-      /**
-       * 获取真实分辨率
-       * -s $(xdpyinfo | grep dimensions | awk '{print $2;}')
-       */
-      /**
-       * 捕获桌面流参考链接
-       * - https://www.bilibili.com/read/cv20197318/
-       * - https://zhuanlan.zhihu.com/p/455572544#h_455572544_20
-       */
-      source = '-f gdigrab -s 1920x1080 -draw_mouse 1 -show_region 1 -i desktop'
-    } else if (/^rtsp[:]/.test(this.source)) {
-      source = `-rtsp_transport tcp -i ${this.source}`
-    }
+      if (this.name === 'desktop' && !this.source) {
+        /**
+         * -f参数说明
+         * x11grab  指定输入格式为X11抓取
+         * gdigrab
+         */
+        /**
+         * 获取真实分辨率
+         * -s $(xdpyinfo | grep dimensions | awk '{print $2;}')
+         */
+        /**
+         * 捕获桌面流参考链接
+         * - https://www.bilibili.com/read/cv20197318/
+         * - https://zhuanlan.zhihu.com/p/455572544#h_455572544_20
+         */
+        source = '-f gdigrab -draw_mouse 1 -i desktop'
+      } else if (/^rtsp[:]/.test(this.source)) {
+        source = `-rtsp_transport tcp -i ${this.source}`
+      }
 
-    if (!source) {
-      this.log('无法识别流媒体源类型，不启动ffmpeg推流 -> ' + this.source)
-      return
-    }
+      if (!source) {
+        this.log('无法识别流媒体源类型，不启动ffmpeg推流 -> ' + this.source)
+        return
+      }
 
-    this.log('启动ffmpeg推流进程 -> ' + source)
-    this.status = 'starting'
-    this.ffmpeProcess = spawn(`ffmpeg`, [
-      ...source.split(' '),
-      '-q',
-      '0',
-      '-f',
-      'mpegts',
-      '-codec:v',
-      'mpeg1video',
-      '-s',
-      this.outputResolution || '1920x1080',
-      '-b:v',
-      this.outputRate || '1500k',
-      '-codec:a',
-      'mp2',
-      '-ar',
-      '44100',
-      '-ac',
-      '1',
-      '-b:a',
-      '128k',
-      `http://127.0.0.1:${this.serverOptions.streamPort}/${this.name}`
-    ])
-    this.ffmpeProcess.on('error', (err) => {
-      this.ffmpeProcess.disconnect()
-      this.ffmpeProcess = null
-      this.start()
+      this.log('启动ffmpeg推流进程 -> ' + source)
+      this.ffmpeProcess = spawn(`ffmpeg`, [
+        ...source.split(' '),
+        '-q',
+        '0',
+        '-f',
+        'mpegts',
+        '-codec:v',
+        'mpeg1video',
+        '-s',
+        this.ffmpegOptions.outputResolution || '1920x1080',
+        '-b:v',
+        this.ffmpegOptions.outputRate || '1500k',
+        '-codec:a',
+        'mp2',
+        '-ar',
+        '44100',
+        '-ac',
+        '1',
+        '-b:a',
+        '128k',
+        `http://127.0.0.1:${this.serverOptions.streamPort}/${this.name}`
+      ])
+      this.ffmpeProcess.on('error', (err) => {
+        // this.ffmpeProcess.disconnect()
+        // this.ffmpeProcess = null
+        // this.start()
+        // this.status = 'stoped'
+        this.log('ffmpeg推流进程出错 -> ' + err)
+      })
+      this.ffmpeProcess.on('exit', (code, signal) => {
+        if (this.timers.notReceivedFromStream) {
+          clearTimeout(this.timers.notReceivedFromStream)
+          this.timers.notReceivedFromStream = null
+        }
+        this.log(
+          `ffmpeg推流进程关闭 -> code: ${code} signal: ${signal}` //  error: ${this.ffmpeProcess.stderr.read()}
+        )
+        this.status = 'stoped'
+        this.ffmpeProcess = null
+        if (this.clients.length > 0) {
+          // 还有客户端，表示异常退出，重新启动
+          this.start()
+        }
+      })
+    } catch (error) {
       this.status = 'stoped'
-      this.log('ffmpeg推流进程出错 -> ' + err)
-    })
-    this.ffmpeProcess.on('exit', (code, signal) => {
-      // this.ffmpeProcess.disconnect()
-      this.status = 'stoped'
-      this.log(
-        `ffmpeg推流进程关闭 -> code: ${code} signal: ${signal}` //  error: ${this.ffmpeProcess.stderr.read()}
-      )
-      this.ffmpeProcess = null
-    })
+    }
   }
   stop() {
     if (!this.ffmpeProcess) {
@@ -216,7 +222,16 @@ class StreamChannel {
 
     this.log('开始停止ffmpeg推流进程')
     this.status = 'stoping'
-    this.ffmpeProcess?.kill()
+    this.ffmpeProcess?.kill(1000)
+  }
+  #onStreamInterrupt() {
+    this.log('超过10秒未收到推流端数据，重启ffmpeg进程')
+    this.timers.notReceivedFromStream = null
+    this.stop()
+  }
+  #onLastClientLost() {
+    this.timers.lostLastClient = null
+    this.stop()
   }
 }
 

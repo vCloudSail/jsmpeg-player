@@ -26,9 +26,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "dev:full": "npm run server && npm run dev",
     "build": "vite build",
-    "server": "cd server && call start.bat",
+    "server": "node ./server/index.js",
     "lint": "vue-cli-service lint",
     "clear": "rimraf .eslintcache && rimraf package-lock.json && rimraf yarn.lock && rimraf pnpm-lock.yaml && rimraf node_modules",
     "reinstall": "npm run clear && yarn",

@@ -209,6 +209,8 @@ export default {
 - [ ] 剔除element-ui的依赖，自行实现部分组件
 - [ ] 画中画显示(原生只支持video元素画中画显示，目前还没想到方案)
 - [x] 已知的性能问题(在data中定义了player，导致被双向绑定)
+- [x] 升级至vite
+- [ ] 同时支持vue2/vue3
 
 
 ## 效果演示
@@ -240,12 +242,11 @@ export default {
 ## 运行DEMO
 
 1. 拉取git仓库
-2. 运行cmd: npm i
-3. 运行cmd: npm run dev:full
-4. 会分别弹出两个命令行窗口，一个是ffmpeg转码，一个是中转服务器
+2. 安装依赖包，运行cmd: npm i
+3. 启动服务端，运行cmd: npm run server
+4. 启动DEMO客户端，运行cmd: npm run dev
 5. 查看demo
 
-**注意：ffmpeg默认拉取桌面流，如果要测试其他rtsp流请自行修改server/run-ffmpeg.bat文件的ffmpeg代码**
 
 ffmpeg拉取桌面流见此文章：https://waitwut.info/blog/2013/06/09/desktop-streaming-with-ffmpeg-for-lower-latency/
 

@@ -39,7 +39,7 @@ socketServer.on('connection', function (socket, request) {
 
   const pathArr = url.pathname.split('/')
   const channelName = pathArr[1]
-  
+
   console.log(
     `Websocket客户端接入(${channelName}): \n`,
     (request || socket.request).socket.remoteAddress,
@@ -61,7 +61,9 @@ socketServer.on('connection', function (socket, request) {
     const channel = new StreamChannel(
       {
         name: channelName,
-        source: url.searchParams.get('source')
+        source: url.searchParams.get('source'),
+        resolution: url.searchParams.get('resolution'),
+        rate: url.searchParams.get('rate')
       },
       options
     )
@@ -144,5 +146,5 @@ console.log(
   `Http Server(ffmpeg 推流地址): http://0.0.0.0:${options.streamPort}/{name}`
 )
 console.log(
-  `WebSocket Server(jsmpeg客户端连接地址): ws://0.0.0.0:${options.websocketPort}/{channelName}?rtsp={rtspUrl}`
+  `WebSocket Server(jsmpeg客户端连接地址): ws://0.0.0.0:${options.websocketPort}/{channelName}?source={sourceUrl}`
 )

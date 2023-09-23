@@ -32,7 +32,7 @@
 <script>
 import { formatTimestamp } from '@cloudsail/jsmpeg/utils'
 
-const demoUrl = 'ws://localhost:18082/desktop'
+const demoUrl = 'ws://localhost:18082/desktop?resolution=&rate=1000K'
 
 class Timer {
   _startTime = null
