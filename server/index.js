@@ -58,15 +58,13 @@ socketServer.on('connection', function (socket, request) {
     url.searchParams.forEach((value, key) => {
       params[key] = value
     })
-    const channel = new StreamChannel(
-      {
-        name: channelName,
-        source: url.searchParams.get('source'),
-        resolution: url.searchParams.get('resolution'),
-        rate: url.searchParams.get('rate')
-      },
-      options
-    )
+    const channel = new StreamChannel({
+      name: channelName,
+      source: url.searchParams.get('source'),
+      resolution: url.searchParams.get('resolution'),
+      rate: url.searchParams.get('rate'),
+      serverOptions: options
+    })
     channel.addClient(socket)
 
     streamChannelMap.set(channelName, channel)
@@ -107,16 +105,6 @@ const streamServer = http.createServer(function (request, response) {
   }
 
   streamChannelMap.get(channelName).acceptIncomingMessage(request)
-  // if (params[0] !== options.STREAM_SECRET) {
-  //   console.log(
-  //     '推流端连接失败: ' +
-  //       request.socket.remoteAddress +
-  //       ':' +
-  //       request.socket.remotePort +
-  //       ' - wrong secret.\n'
-  //   )
-  //   response.end()
-  // }
 
   response.connection.setTimeout(0)
   // request.on('data', function (data) {
@@ -138,13 +126,27 @@ const streamServer = http.createServer(function (request, response) {
   //   request.socket.recording = fs.createWriteStream(path)
   // }
 })
-// Keep the socket open for streaming
-streamServer.headersTimeout = 0
-streamServer.listen(options.streamPort)
+
+const ipList = []
+const networkInterfaces = os.networkInterfaces()
+Object.entries(networkInterfaces).forEach((value) => {
+  const ip = value[1].find((item) => item.family === 'IPv4')
+  ipList.push(ip.address)
+})
 
 console.log(
-  `Http Server(ffmpeg 推流地址): http://0.0.0.0:${options.streamPort}/{name}`
+  `Http Server(ffmpeg 推流地址): \r\n  ${ipList
+    .map((ip) => `http://${ip}:${options.streamPort}/{channelName}`)
+    .join('\r\n  ')}`
 )
 console.log(
-  `WebSocket Server(jsmpeg客户端连接地址): ws://0.0.0.0:${options.websocketPort}/{channelName}?source={sourceUrl}`
+  `WebSocket Server(jsmpeg客户端连接地址): \r\n  ${ipList
+    .map(
+      (ip) =>
+        `ws://${ip}:${options.streamPort}/{channelName}?source={sourceUrl}`
+    )
+    .join('\r\n  ')}`
 )
+
+streamServer.headersTimeout = 0
+streamServer.listen(options.streamPort)

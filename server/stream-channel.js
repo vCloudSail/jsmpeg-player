@@ -28,7 +28,14 @@ class StreamChannel {
     /** */
     notReceivedFromStream: null
   }
-  constructor({ name, source, resolution, rate } = {}, serverOptions) {
+  constructor({
+    name,
+    source,
+    resolution,
+    rate,
+    maxClient,
+    serverOptions
+  } = {}) {
     this.name = name
     this.source = source
     this.ffmpegOptions.outputRate = rate || '1500K'
@@ -126,6 +133,7 @@ class StreamChannel {
 
       this.stop()
     } else {
+      this.status = 'stoped'
       this.start()
     }
   }

@@ -39,7 +39,7 @@ http://127.0.0.1:8890/jsmpeg
 
 PS: 
 - 如果是公网，需要自行解决拉取摄像头rtsp流
-- 本组件仅实现了前端（客户端）部分的功能，需自行实现后端部分的功能
+- 本组件仅实现了前端（客户端）部分的功能，后端部分的功能可参考server目录下的代码
 
 ## 安装教程
 本组件使用了element-ui部分组件（后续有空了考虑剔除）以及ES6+语法，要求如下：
@@ -239,11 +239,12 @@ export default {
   
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/d95d0987763546fbb4a5a4107b919f50.gif)
 
+
 ## 运行DEMO
 
 1. 拉取git仓库
 2. 安装依赖包，运行cmd: npm i
-3. 启动服务端，运行cmd: npm run server
+3. 启动服务端，运行cmd: npm run server (如果使用vscode，建议通过vscode启动)
 4. 启动DEMO客户端，运行cmd: npm run dev
 5. 查看demo
 
