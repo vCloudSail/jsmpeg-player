@@ -1,6 +1,7 @@
 @import './icon/index.css';
 @import './popover.scss';
 @import './keyframes.scss';
+@import './flex.scss';
 
 .jsmpeg-player {
   width: 100%;
@@ -52,8 +53,12 @@
     }
 
     .player-title {
+      max-width: 100%;
       color: #fff;
       float: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .recording-tips {
@@ -89,12 +94,12 @@
     }
 
     .close-btn {
-      color: gray;
+      color: whitesmoke;
       transition: 0.28s color;
       position: absolute;
       top: 0;
       right: 5px;
-      font-size: 18px;
+      font-size: 16px;
 
       &:hover {
         color: #f56c6c;

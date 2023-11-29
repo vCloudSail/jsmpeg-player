@@ -1,20 +1,6 @@
 <template>
   <div id="app">
     <div class="header">
-      <el-row>
-        websocket:
-        <el-input
-          v-model="tempUrl"
-          style="width: 300px"
-        ></el-input>
-        <el-button
-          @click="url = tempUrl"
-          style="margin-left: 10px"
-        >
-          连接
-        </el-button>
-        <el-button @click="url = tempUrl = demoUrl">重置</el-button>
-      </el-row>
       <el-row class="current-time">
         延迟测试：{{ currTime }}
         <el-button
@@ -25,14 +11,48 @@
         </el-button>
       </el-row>
     </div>
-    <div class="main"> <jsmpeg-player :url="url" /></div>
+    <div class="main">
+      <el-tabs
+        v-model="activeTab"
+        type="border-card"
+        style="width: 100%"
+      >
+        <el-tab-pane
+          name="sing"
+          label="单路播放"
+        >
+          <el-row>
+            websocket:
+            <el-input
+              v-model="tempUrl"
+              style="width: 300px; margin-bottom: 12px"
+            ></el-input>
+            <el-button
+              @click="url = tempUrl"
+              style="margin-left: 10px"
+            >
+              连接
+            </el-button>
+            <el-button @click="url = tempUrl = demoUrl">重置</el-button>
+          </el-row>
+          <jsmpeg-player :url="url" />
+        </el-tab-pane>
+        <el-tab-pane
+          name="mutli"
+          label="多路播放"
+          lazy
+        >
+          <jsmpeg-player.multipath v-model="players"> </jsmpeg-player.multipath>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
 <script>
 import { formatTimestamp } from '@cloudsail/jsmpeg/utils'
 
-const demoUrl = 'ws://localhost:18082/desktop?resolution=&rate=1000K'
+const demoUrl = 'ws://localhost:18082/desktop?resolution=&bitrate=1000K'
 
 class Timer {
   _startTime = null
@@ -74,8 +94,26 @@ export default {
   data() {
     return {
       url: demoUrl,
+      activeTab: 'sing',
       tempUrl: demoUrl,
-      timer: new Timer()
+      timer: new Timer(),
+      players: [
+        {
+          id: 'deps',
+          title: '桌面',
+          url: demoUrl
+        },
+        {
+          id: 'apple',
+          title: '苹果测试流 (丢帧，17秒左右就卡顿)',
+          url: "ws://localhost:18082/apple?source=http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8&bitrate=200K"
+        },
+        {
+          id: '伊拉克',
+          title: '伊拉克 Al Sharqiya 电视台',
+          url: "ws://localhost:18082/ylk?source=rtmp://ns8.indexforce.com/home/mystream&bitrate=1M"
+        }
+      ]
     }
   },
   computed: {
@@ -138,7 +176,23 @@ body {
   }
   .main {
     flex: 1;
-    padding: 30px;
+    padding: 0 30px 30px;
+    display: flex;
+    overflow: hidden;
+    .jsmpeg-player {
+      flex: 1;
+      width: auto;
+    }
+    .el-tabs__content {
+      width: 100%;
+      height: calc(100% - 39px);
+      .el-tab-pane {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+    }
   }
 }
 </style>

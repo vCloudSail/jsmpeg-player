@@ -1,29 +1,34 @@
 <template>
-  <div class="jsmpeg-player-toolbar">
+  <div
+    class="player-toolbar"
+    :class="{ 'is-show': player?.playerStatus.playerHover }"
+  >
     <button
-      class="toolbar-btn play-btn"
+      class="toolbar-item play-btn"
       type="button"
-      :class="paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'"
-      :title="paused ? '播放' : '暂停'"
+      :class="
+        player.paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'
+      "
+      :title="player?.paused ? '播放' : '暂停'"
       @click="handleToolbar('play')"
     ></button>
     <button
-      class="toolbar-btn stop-btn jm-icon-stop"
+      class="toolbar-item stop-btn jm-icon-stop"
       title="停止"
       type="button"
       @click="handleToolbar('stop')"
     ></button>
     <button
-      class="toolbar-btn volume-btn"
+      class="toolbar-item volume-btn"
       type="button"
       title="音量"
       v-popover:popover-volume
-      :class="isMuted ? 'jm-icon-muted' : 'jm-icon-volume'"
+      :class="player?.isMuted ? 'jm-icon-muted' : 'jm-icon-volume'"
       @click="handleToolbar('mute')"
     ></button>
     <div class="progress-bar">
       <span
-        v-if="showDuration"
+        v-if="player.showDuration"
         class="current-time"
       >
         {{ currentTimeLabel }}
@@ -35,40 +40,42 @@
         <i class="jm-icon-copy-document"></i>
       </button> -->
     <button
-      class="toolbar-btn snapshot-btn jm-icon-screenshots"
+      class="toolbar-item snapshot-btn jm-icon-screenshots"
       title="截图"
       type="button"
       @click="handleToolbar('snapshot')"
     ></button>
     <button
-      class="toolbar-btn recording-btn jm-icon-recording"
+      class="toolbar-item recording-btn jm-icon-recording"
       type="button"
-      :class="isRecording ? 'is-recording' : ''"
-      :title="isRecording ? '停止录制' : '录制'"
+      :class="player?.playerStatus.recording ? 'is-recording' : ''"
+      :title="player?.playerStatus.recording ? '停止录制' : '录制'"
       @click="handleToolbar('recording')"
     ></button>
     <button
-      class="toolbar-btn setting-btn jm-icon-settings"
+      class="toolbar-item setting-btn jm-icon-settings"
       title="设置"
       type="button"
       v-popover:popover-setting
     ></button>
     <button
-      class="toolbar-btn fullscreen-btn"
+      class="toolbar-item fullscreen-btn"
       type="button"
       :class="
-        flags.fullscreen ? 'jm-icon-exitfullscreen' : 'jm-icon-fullscreen'
+        player.playerStatus.fullscreen
+          ? 'jm-icon-fullscreen-exit'
+          : 'jm-icon-fullscreen'
       "
-      :title="flags.fullscreen ? '取消全屏' : '全屏'"
+      :title="player.playerStatus.fullscreen ? '取消全屏' : '全屏'"
       @click="handleToolbar('fullscreen')"
     ></button>
-    <div class="popover__wrap">
+    <div class="overlayers">
       <el-popover
-        popper-class="jsmpeg-player-toolbar--popover popover-setting"
+        popper-class="jsmpeg-player-popover popover-setting"
         ref="popover-setting"
         trigger="hover"
         placement="top-end"
-        :visible-arrow="popoverVisibleArrow"
+        :visible-arrow="false"
         :append-to-body="false"
       >
         <!-- <div class="setting-item">
@@ -97,8 +104,8 @@
           <div class="input__wrap">
             <el-switch
               class="input"
-              v-model="playerSettings.autoStretch"
-              @change="settingPlayer('autoStretch', $event)"
+              v-model="player.playerSettings.autoStretch"
+              @change="player.settingPlayer('autoStretch', $event)"
             >
             </el-switch>
           </div>
@@ -110,13 +117,13 @@
           <span class="label">旋转画面</span>
           <div class="input__wrap">
             <button
-              class="toolbar-btn jm-icon-rotate-left"
+              class="toolbar-item jm-icon-rotate-left"
               title="向左旋转90度"
               type="button"
               @click="rotate(-90, true)"
             ></button>
             <button
-              class="toolbar-btn jm-icon-rotate-right"
+              class="toolbar-item jm-icon-rotate-right"
               title="向右旋转90度"
               type="button"
               @click="rotate(90, true)"
@@ -137,12 +144,12 @@
         ref="popover-volume"
         trigger="hover"
         placement="top"
-        :visible-arrow="popoverVisibleArrow"
+        :visible-arrow="false"
         :append-to-body="false"
       >
         <div class="volume-value">{{ volumePercent }}</div>
         <el-slider
-          v-model="volume"
+          v-model="player.volume"
           vertical
           height="120px"
           :max="1"
@@ -154,7 +161,7 @@
             0.5: '',
             1: ''
           }"
-          @change="$emit('volume-change', volume)"
+          @change="$emit('volume-change', player.volume)"
         >
         </el-slider>
       </el-popover>
@@ -163,6 +170,8 @@
 </template>
 
 <script>
+import { formatTimestamp } from '@cloudsail/jsmpeg/utils'
+
 /**
  * jsmpeg-player-toolbar
  * @author cloudsail
@@ -177,6 +186,11 @@ export default {
   props: {
     playerStatus: Object
   },
+  inject: {
+    player: {
+      default: null
+    }
+  },
   // #endregion
 
   // #region 数据相关
@@ -186,7 +200,11 @@ export default {
   computed: {
     /** @returns {string} */
     currentTimeLabel() {
-      return formatTimestamp(this.playerStatus.currentTime * 1000)
+      return formatTimestamp(this.player.playerStatus.currentTime * 1000)
+    },
+    /** @returns {number} */
+    volumePercent() {
+      return parseInt(this.player.volume * 100)
     }
   },
   watch: {},
@@ -199,7 +217,7 @@ export default {
 
   methods: {
     handleToolbar(cmd, data) {
-      this.$emit('command ', cmd, data)
+      this.$emit('command', cmd, data)
     }
   }
 }

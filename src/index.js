@@ -1,12 +1,13 @@
-import JsmpegPlayer from './player.vue'
-import JsmpegPlayerScreen from './components/screen.vue'
+import JSMpegPlayer from './player.vue'
+import JSMpegMultipathPlayer from './multipath-player.vue'
 
 export function install(Vue) {
   if (install.installed) return
 
   install.installed = true
 
-  Vue.component(JsmpegPlayer.name, JsmpegPlayer)
+  Vue.component(JSMpegPlayer.name, JSMpegPlayer)
+  Vue.component('jsmpeg-player.multipath', JSMpegMultipathPlayer)
 }
 
 const plugin = {
@@ -23,7 +24,7 @@ if (GlobalVue) {
   GlobalVue.use(plugin)
 }
 
-JsmpegPlayer.install = install
-
-export { JsmpegPlayerScreen }
-export default JsmpegPlayer
+export { JSMpegPlayer, JSMpegMultipathPlayer }
+export default {
+  install
+}

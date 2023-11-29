@@ -1,70 +1,95 @@
 @font-face {
-  font-family: 'jsmpeg-player'; /* Project id 2580924 */
-  src: url('iconfont.woff2?t=1660312070074') format('woff2'),
-    url('iconfont.woff?t=1660312070074') format('woff'),
-    url('iconfont.ttf?t=1660312070074') format('truetype');
+  font-family: "jsmpeg-player"; /* Project id 2580924 */
+  src: url('iconfont.woff2?t=1697092567259') format('woff2'),
+       url('iconfont.woff?t=1697092567259') format('woff'),
+       url('iconfont.ttf?t=1697092567259') format('truetype');
 }
 
 .jsmpeg-player {
-  font-family: 'jsmpeg-player' !important;
+  font-family: "jsmpeg-player" !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.jm-icon-splitscreen-4:before {
+  content: "\e604";
+}
+
+.jm-icon-splitscreen-1:before {
+  content: "\e632";
+}
+
+.jm-icon-splitscreen-4-1:before {
+  content: "\e633";
+}
+
+.jm-icon-splitscreen-6:before {
+  content: "\e613";
+}
+
+.jm-icon-splitscreen-8:before {
+  content: "\e612";
+}
+
+.jm-icon-splitscreen-9:before {
+  content: "\e614";
+}
+
 .jm-icon-close:before {
-  content: '\e661';
+  content: "\e661";
 }
 
 .jm-icon-settings:before {
-  content: '\e892';
+  content: "\e892";
 }
 
 .jm-icon-video-play:before {
-  content: '\e600';
+  content: "\e600";
 }
 
 .jm-icon-more:before {
-  content: '\e601';
+  content: "\e601";
 }
 
 .jm-icon-screenshots:before {
-  content: '\e602';
+  content: "\e602";
 }
 
 .jm-icon-video-pause:before {
-  content: '\e603';
+  content: "\e603";
 }
 
 .jm-icon-recording:before {
-  content: '\e663';
+  content: "\e663";
 }
 
 .jm-icon-rotate-right:before {
-  content: '\e698';
+  content: "\e698";
 }
 
 .jm-icon-rotate-left:before {
-  content: '\e699';
+  content: "\e699";
 }
 
 .jm-icon-stop:before {
-  content: '\e611';
+  content: "\e611";
 }
 
 .jm-icon-fullscreen-exit:before {
-  content: '\e65d';
+  content: "\e65d";
 }
 
 .jm-icon-fullscreen:before {
-  content: '\e65e';
+  content: "\e65e";
 }
 
 .jm-icon-muted:before {
-  content: '\e62d';
+  content: "\e62d";
 }
 
 .jm-icon-volume:before {
-  content: '\e62e';
+  content: "\e62e";
 }
+

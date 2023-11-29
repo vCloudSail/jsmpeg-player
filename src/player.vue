@@ -15,6 +15,7 @@
       <span
         v-else-if="displayTitle"
         class="player-title"
+        :title="displayTitle"
       >
         {{ displayTitle }}
       </span>
@@ -48,7 +49,6 @@
           <slot
             v-if="hasLoadingSlot"
             name="loading"
-            :text="loadingText"
           ></slot>
           <loading
             v-else
@@ -67,177 +67,12 @@
         </template>
       </template>
     </div>
-    <div
-      class="player-toolbar"
+    <player-toolbar
       v-if="withToolbar"
-      :class="{ 'is-show': playerStatus.playerHover }"
-      @mouseenter="handleToolbarMouseEnter"
-      @mouseleave="handleToolbarMouseLeave"
-    >
-      <button
-        class="toolbar-item play-btn"
-        type="button"
-        :class="paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'"
-        :title="paused ? '播放' : '暂停'"
-        @click="handleToolbar('play')"
-      ></button>
-      <button
-        class="toolbar-item stop-btn jm-icon-stop"
-        title="停止"
-        type="button"
-        @click="handleToolbar('stop')"
-      ></button>
-      <button
-        class="toolbar-item volume-btn"
-        type="button"
-        title="音量"
-        v-popover:popover-volume
-        :class="isMuted ? 'jm-icon-muted' : 'jm-icon-volume'"
-        @click="handleToolbar('mute')"
-      ></button>
-      <div class="progress-bar">
-        <span
-          v-if="showDuration"
-          class="current-time"
-        >
-          {{ currentTimeLabel }}
-        </span>
-      </div>
-      <!-- <button class="snapshot-btn"
-              title="画中画"
-              @click="requesPip">
-        <i class="jm-icon-copy-document"></i>
-      </button> -->
-      <button
-        class="toolbar-item snapshot-btn jm-icon-screenshots"
-        title="截图"
-        type="button"
-        @click="handleToolbar('snapshot')"
-      ></button>
-      <button
-        class="toolbar-item recording-btn jm-icon-recording"
-        type="button"
-        :class="playerStatus.recording ? 'is-recording' : ''"
-        :title="playerStatus.recording ? '停止录制' : '录制'"
-        @click="handleToolbar('recording')"
-      ></button>
-      <button
-        class="toolbar-item setting-btn jm-icon-settings"
-        title="设置"
-        type="button"
-        v-popover:popover-setting
-      ></button>
-      <button
-        class="toolbar-item fullscreen-btn"
-        type="button"
-        :class="
-          playerStatus.fullscreen
-            ? 'jm-icon-fullscreen-exit'
-            : 'jm-icon-fullscreen'
-        "
-        :title="playerStatus.fullscreen ? '取消全屏' : '全屏'"
-        @click="handleToolbar('fullscreen')"
-      ></button>
-    </div>
-    <div class="overlayers">
-      <template v-if="withToolbar">
-        <el-popover
-          popper-class="jsmpeg-player-popover popover-setting"
-          ref="popover-setting"
-          trigger="hover"
-          placement="top-end"
-          :visible-arrow="popoverVisibleArrow"
-          :append-to-body="false"
-        >
-          <!-- <div class="setting-item">
-            <span class="label">禁用WebGL</span>
-            <div class="input__wrap">
-              <el-switch class="input"
-                         v-model="playerSettings.disableGl">
-              </el-switch>
-            </div>
-          </div> -->
-          <!-- <div class="setting-item"
-               highlight>
-            <span class="label">后台播放</span>
-            <div class="input__wrap">
-              <el-switch class="input"
-                         v-model="playerSettings.backgroudPlay"
-                         @change="settingPlayer('pauseWhenHidden',!$event)">
-              </el-switch>
-            </div>
-          </div> -->
-          <div
-            class="setting-item"
-            highlight
-          >
-            <span class="label">自动拉伸</span>
-            <div class="input__wrap">
-              <el-switch
-                class="input"
-                v-model="playerSettings.autoStretch"
-                @change="settingPlayer('autoStretch', $event)"
-              >
-              </el-switch>
-            </div>
-          </div>
-          <div
-            class="setting-item"
-            highlight
-          >
-            <span class="label">旋转画面</span>
-            <div class="input__wrap">
-              <button
-                class="toolbar-item jm-icon-rotate-left"
-                title="向左旋转90度"
-                type="button"
-                @click="rotate(-90, true)"
-              ></button>
-              <button
-                class="toolbar-item jm-icon-rotate-right"
-                title="向右旋转90度"
-                type="button"
-                @click="rotate(90, true)"
-              ></button>
-            </div>
-          </div>
-          <!-- <div class="setting-item">
-          <span class="label">test</span>
-          <div class="input__wrap">
-            <el-button class="input"
-                       @click="player.stop(true)">
-            </el-button>
-          </div>
-        </div> -->
-        </el-popover>
-        <el-popover
-          popper-class="jsmpeg-player-popover popover-volume"
-          ref="popover-volume"
-          trigger="hover"
-          placement="top"
-          :visible-arrow="popoverVisibleArrow"
-          :append-to-body="false"
-        >
-          <div class="volume-value">{{ volumePercent }}</div>
-          <el-slider
-            v-model="volume"
-            vertical
-            height="120px"
-            :max="1"
-            :min="0"
-            :step="0.01"
-            :show-tooltip="false"
-            :marks="{
-              0: '',
-              0.5: '',
-              1: ''
-            }"
-            @change="$emit('volume-change', volume)"
-          >
-          </el-slider>
-        </el-popover>
-      </template>
-    </div>
+      @command="handleToolbar"
+      @mouseenter.native="handleToolbarMouseEnter"
+      @mouseleave.native="handleToolbarMouseLeave"
+    ></player-toolbar>
   </div>
 </template>
 
@@ -247,6 +82,7 @@ import fullscreen from '@cloudsail/jsmpeg/utils/fullscreen'
 import { formatTimestamp } from '@cloudsail/jsmpeg/utils'
 
 import Loading from './components/loading.vue'
+import PlayerToolbar from './components/toolbar.vue'
 // import Contextmenu from './components/contextmenu.vue'
 
 const defaultOptions = () => ({
@@ -277,9 +113,9 @@ const defaultOptions = () => ({
   /** 流媒体时，以秒为单位的最大排队音频长度。（可以理解为能接受的最大音画不同步时间） */
   maxAudioLag: 0.25,
   /** 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。 */
-  videoBufferSize: 1024 * 1024,
+  videoBufferSize: 512 * 1024,
   /** 流媒体时，音频解码缓冲区的字节大小。默认的128 * 1024 (128 kb)。对于非常高的比特率，您可能需要增加此值。 */
-  audioBufferSize: 256 * 1024
+  audioBufferSize: 128 * 1024
 })
 
 export default {
@@ -313,10 +149,6 @@ export default {
       type: Boolean,
       default: true
     },
-    popoverVisibleArrow: {
-      type: Boolean,
-      default: true
-    },
     noSignalText: {
       type: String,
       default: '无信号'
@@ -327,7 +159,7 @@ export default {
     }
   },
   directives: {},
-  components: { Loading },
+  components: { Loading, PlayerToolbar },
   inject: {
     /** @returns {any} */
     rootTabs: {
@@ -424,14 +256,6 @@ export default {
       get() {
         return this.playerStatus.volume
       }
-    },
-    /** @returns {number} */
-    volumePercent() {
-      return parseInt(this.volume * 100)
-    },
-    /** @returns {string} */
-    currentTimeLabel() {
-      return formatTimestamp(this.playerStatus.currentTime * 1000)
     },
     /** @returns {boolean} */
     isMuted() {

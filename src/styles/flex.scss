@@ -1,0 +1,80 @@
+.flex {
+  display: flex;
+  overflow: hidden;
+}
+
+
+.flex-center {
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-row {
+  @extend .flex;
+  align-items: center;
+
+  &--center {
+    @extend .flex-row;
+    @extend .flex-center;
+  }
+}
+
+.flex-col,
+.flex-column {
+  @extend .flex;
+  flex-direction: column;
+
+  &--center {
+    @extend .flex-column;
+    @extend .flex-center;
+  }
+}
+
+/*
+注意：如果flex布局元素的祖先元素都没有明确的width、height，
+布局上可能会有一些异常，加上height/width:auto;可能可以解决
+*/
+.flex-container {
+  @extend .flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+
+  >* {
+    box-sizing: border-box;
+  }
+
+  .overlayers {
+    width: 0;
+    height: 0;
+  }
+}
+
+.flex-1,
+.flex-main {
+  flex: 1 1 auto;
+}
+
+.flex-header,
+.flex-footer,
+.flex-aside {
+  flex-shrink: 0;
+  // overflow: hidden;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.flex-aside {
+  flex: 0 0 auto;
+  height: 100%;
+  width: auto;
+}
+
+.flex-header,
+.flex-footer {
+  height: auto;
+  width: 100%;
+}

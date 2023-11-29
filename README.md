@@ -1,17 +1,18 @@
 # jsmpeg-player
 
 ## 介绍
-本组件是基于[jsmpeg.js](https://github.com/phoboslab/jsmpeg)二次开发的vue组件
+本组件是基于[jsmpeg.js](https://github.com/phoboslab/jsmpeg)二次开发的vue2组件（未来会支持vue3）
 
 - web播放实时视频流的几种方案对比，详见[此处](https://blog.csdn.net/a843334549/article/details/117319350)
 - 本方案详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
 - jsmpeg.js相关链接：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)、[官网](https://jsmpeg.com/)
-- 关于延迟问题，仅在局域网\本机下实测1s左右，在公网下未知，公网要考虑的东西太多(带宽、丢包、流量)，公网下的流媒体服务框架这里推荐[ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit)
-- jsmpeg采用软解码方式，对客户端硬件有一定的性能要求
-- 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
-- 存在性能瓶颈，本组件可能不适用于大型项目
+- **关于延迟问题**：仅在局域网\本机下实测1s左右，在公网下未知，公网要考虑的东西太多(带宽、丢包、流量)，公网下的流媒体服务框架这里推荐[ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit)
+- **关于性能问题**
+  - jsmpeg采用软解码方式，对客户端硬件有一定的性能要求，后续有空会做一下性能测试
+  - 存在性能瓶颈，本组件可能不适用于大型项目
+  - 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
 - 交流QQ群：56370082（请备注来源）
-  
+
 ### 支持的格式
 - 视频：mpeg1
 - 音频：mp2
@@ -42,13 +43,12 @@ PS:
 - 本组件仅实现了前端（客户端）部分的功能，后端部分的功能可参考server目录下的代码
 
 ## 安装教程
-本组件使用了element-ui部分组件（后续有空了考虑剔除）以及ES6+语法，要求如下：
-- element-ui>2.15.1
-- vue>2.6.1
-- core-js>3(如果不安装，编译会报错)
+本组件使用了ES6+语法，要求如下：
+- ```vue > 2.6.0```
+- ```core-js > 3 ``` (如果不安装，编译会报错)
 
 ```javascript
-npm i core-js@3 element-ui@2 vue@2 -S
+npm i core-js@3 vue@2 -S
 
 npm i vue-jsmpeg-player -S
 ```
@@ -57,32 +57,30 @@ npm i vue-jsmpeg-player -S
 ```javascript
 // main.js
 import Vue from 'vue'
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
 
 import JSMpegPlayer from 'vue-jsmpeg-player';
-import 'vue-jsmpeg-player/dist/jsmpeg-player.css';
+import 'vue-jsmpeg-player/dist/index.css';
 
-Vue.use(ElementUI)
 Vue.use(JSMpegPlayer)
 
 // 或者
 
-import { JsmpegPlayer } from 'vue-jsmpeg-player';
-import 'vue-jsmpeg-player/dist/jsmpeg-player.css';
+import { JSMpegPlayer, JSMpegMultipathPlayer } from 'vue-jsmpeg-player';
+import 'vue-jsmpeg-player/dist/style.css';
 
-Vue.component(JsmpegPlayer.name, JsmpegPlayer)
+Vue.component(JSMpegPlayer.name, JSMpegPlayer)
+Vue.component(JSMpegMultipathPlayer.name, JSMpegMultipathPlayer)
 ```
 
 **局部组件**
 ```javascript
-import { JsmpegPlayer } from 'vue-jsmpeg-player';
-import 'vue-jsmpeg-player/dist/jsmpeg-player.css';
+import { JSMpegPlayer, JSMpegMultipathPlayer } from 'vue-jsmpeg-player';
+import 'vue-jsmpeg-player/dist/style.css';
 
 export default {
   ...
 
-  components: { JsmpegPlayer },
+  components: { [JSMpegPlayer.name]: JSMpegPlayer, [JSMpegMultipathPlayer.name]: JSMpegMultipathPlayer },
 
   ...
 }
@@ -90,7 +88,9 @@ export default {
 ```
 
 **使用**
-```javascript
+
+- 单路播放
+```vue
 <template>
   <div>
     <jsmpeg-player :url="url" />
@@ -123,9 +123,49 @@ export default {
 
 ```
 
+- 多路播放
+```vue
+<template>
+  <div>
+    <jsmpeg-player.multipath v-model="players" />
+  </div>
+</template>
+
+<script>
+
+export default {
+  components: {},
+
+  data() {
+    return {
+      players: [ 
+        {
+          title: '桌面',
+          url: 'ws://127.0.0.1:18081/desktop'
+        }
+      ],
+    }
+  },
+  computed: {
+  },
+
+  mounted() {
+  },
+  beforeDestroy() {
+  },
+  methods: {}
+}
+</script>
+
+<style lang="scss">
+</style>
+
+```
 ## 使用说明
 
-### 属性 & Props：
+### JSMpegPlayer - 单路播放器
+
+#### 属性 & Props
 
 | 名称           | 类型    | 说明                                                                         |
 | -------------- | ------- | ---------------------------------------------------------------------------- |
@@ -136,9 +176,9 @@ export default {
 | closeable      | boolean | 是否可关闭（单击关闭按钮，仅抛出事件）                                       |
 | in-background  | boolean | 是否处于后台，如el-tabs的切换，路由的切换等，支持.sync修饰符                 |
 | show-duration  | boolean | 是否显示持续播放时间                                                         |
-| default-muted   | boolean | 默认静音                                                                     |
+| default-muted  | boolean | 默认静音                                                                     |
 | with-toolbar   | boolean | 是否需要工具栏                                                               |
-| loading-text   | boolean | 加载时的文本，默认为：拼命加载中                                          |
+| loading-text   | boolean | 加载时的文本，默认为：拼命加载中                                             |
 
 **原生属性：**
 
@@ -162,8 +202,7 @@ export default {
 | videoBufferSize       | number            | 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。                                |
 | audioBufferSize       | number            | 流媒体时，音频解码缓冲区的字节大小。默认的128 * 1024 (128 kb)。对于非常高的比特率，您可能需要增加此值。                                |
 
-###  事件 & Emits：
-
+#### 事件 & Emits
 支持jsmpeg.js所有原生事件，并转换为短横线命名法，[jsmpeg官方文档 - 事件](https://github.com/phoboslab/jsmpeg#usage)
 
 | 名称               | 原生回调名称            | 参数                     | 说明                                                                                             |
@@ -187,14 +226,70 @@ export default {
 | source-closed      | -                       | -                        | 源关闭事件（仅websocket），当websocket关闭后触发                                                 |
 | resolution-decode  | -                       | decoder, {width, height} | 分辨率解码事件，当获取到视频分辨率时触发发                                                       |
 
-### 插槽 & Slot:
+#### 插槽 & Slot
 | 名称      | 参数 | 说明                                             |
 | --------- | ---- | ------------------------------------------------ |
 | title     | 无   | 标题插槽，使用此插槽后title属性失效              |
-| loading   | 无   | loading插槽，可自定义加载效果         |
+| loading   | 无   | loading插槽，可自定义加载效果                    |
 | no-signal | 无   | 无信号时的插槽，使用此插槽后noSignalText属性失效 |
 
-### 功能 & 计划
+#### 方法 & Method
+| 名称                                   | 参数                                                      | 说明         |
+| -------------------------------------- | --------------------------------------------------------- | ------------ |
+| **原生方法**                           |                                                           |              |
+| play()                                 | -                                                         | 播放         |
+| pause()                                | -                                                         | 暂停播放     |
+| stop()                                 | -                                                         | 停止播放     |
+| nextFrame()                            | -                                                         | 下一帧       |
+| **扩展方法**                           |                                                           | -            |
+| rotate(angle: string, append: bollean) | angle:旋转角度，append:是否为追加角度（即当前角度+angle） | 旋转画面     |
+| toggleFullscreen()                     |                                                           | 切换全屏模式 |
+| snapshot()                             |                                                           | 截图         |
+| toggleMute()                           |                                                           | 切换禁音模式 |
+| toggleRecording()                      |                                                           | 切换录制模式 |
+
+### JSMpegMultipathPlayer - 多路播放器
+
+- [x] 多路播放
+- [x] 支持拖拽交换播放器位置
+- [x] 支持从外部拖入播放器
+- [x] 支持多种分屏模式
+
+#### 属性 & Props
+| 名称          | 类型     | 说明                                                        |
+| ------------- | -------- | ----------------------------------------------------------- |
+| value/v-model | string[] | 播放链接列表                                                |
+| tabindex      | number   | 起始的tabindex，给每个播放器加上tabindex，方便按下tab键切换 |
+| playerProps   | object   | 播放器选项，透传给单个播放器                                |
+
+#### 事件 & Emits：                                                  
+| 名称            | 参数                                                                            | 说明                          |
+| --------------- | ------------------------------------------------------------------------------- | ----------------------------- |
+| player-click    | {data:object,intance:Vue,index:number}                                          | 点击播放器时触发              |
+| player-noSignal | {data:object,intance:Vue,index:number}                                          | loading插槽，可自定义加载效果 |
+| player-swap     | {sourcePlayer:object,sourceIndex:number,targetPlayer:object,targetIndex:number} | 当两个播放器拖拽交换时触发    |
+
+#### 插槽 & Slot:
+| 名称 | 参数 | 说明 |
+| ---- | ---- | ---- |
+
+
+#### 从外部拖入一个播放器
+要实现此功能，只需要在目标元素的drag-out事件中调用dataTransfer.setData方法即可
+```js
+let dt = ev.dataTransfer
+ev.dataTransfer.effectAllowed = 'copy'
+dt.setData(
+  'text/plain',
+  JSON.stringify({
+    id: '', // 非必传
+    title: '',
+    url: '',
+  })
+)
+```
+
+## 功能 & 计划
 
 - [x] 自动重连
 - [x] 接流中断loading
@@ -204,12 +299,12 @@ export default {
 - [x] 全屏切换
 - [x] 全屏切换
 - [x] 事件总线
-- [ ] 多播放器同屏显示
+- [x] 多播放器同屏显示
 - [ ] 国际化
-- [ ] 剔除element-ui的依赖，自行实现部分组件
+- [ ] 移除element-ui的依赖
 - [ ] 画中画显示(原生只支持video元素画中画显示，目前还没想到方案)
 - [x] 已知的性能问题(在data中定义了player，导致被双向绑定)
-- [x] 升级至vite
+- [x] 构建升级到vite
 - [ ] 同时支持vue2/vue3
 
 
@@ -239,6 +334,8 @@ export default {
   
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/d95d0987763546fbb4a5a4107b919f50.gif)
 
+## 服务端
+参考[JSMpegServer文档](./server/README.md)
 
 ## 运行DEMO
 

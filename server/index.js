@@ -61,8 +61,12 @@ socketServer.on('connection', function (socket, request) {
     const channel = new StreamChannel({
       name: channelName,
       source: url.searchParams.get('source'),
-      resolution: url.searchParams.get('resolution'),
-      rate: url.searchParams.get('rate'),
+      timeout: url.searchParams.get('timeout'),
+      maxClient: url.searchParams.get('maxClient'),
+      ffmpegOptions: {
+        resolution: url.searchParams.get('resolution'),
+        bitrate: url.searchParams.get('bitrate')
+      },
       serverOptions: options
     })
     channel.addClient(socket)
@@ -96,11 +100,10 @@ const streamServer = http.createServer(function (request, response) {
       '\n'
   )
   if (!streamChannelMap.has(channelName)) {
-    console.log(
-      `推流端被强制终止: 
-        request.socket.remoteAddress:request.socket.remotePort- 不存在此通道[name].\n`
-    )
-    response.end()
+    // console.log(
+    //   `推流端被强制终止(${request.socket.remoteAddress}:${request.socket.remotePort}) - 不存在此通道[${channelName}].\n`
+    // )
+    // response.end()
     return
   }
 

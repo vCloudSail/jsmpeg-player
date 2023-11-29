@@ -97,7 +97,6 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
       lib: {
         entry: './src/index.js',
         name: libName,
-        formats: ['cjs', 'es', 'umd'],
         fileName: 'index'
       },
       rollupOptions: {
@@ -105,18 +104,34 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
           // 'element-ui',
           'vue'
         ],
-        output: {
-          globals: {
-            // 'element-ui': 'ELEMENT',
-            vue: 'Vue'
+        output: [
+          {
+            globals: {
+              // 'element-ui': 'ELEMENT',
+              vue: 'Vue'
+            },
+            format: 'es',
+            // preserveModules: true, // 保留模块结构
+            // preserveModulesRoot: 'src' // 将保留的模块放在根级别的此路径下
+          },
+          {
+            globals: {
+              // 'element-ui': 'ELEMENT',
+              vue: 'Vue'
+            },
+            format: 'umd',
+            name: libName,
+            exports: 'named'
+          },
+          {
+            globals: {
+              // 'element-ui': 'ELEMENT',
+              vue: 'Vue'
+            },
+            format: 'cjs',
+            exports: 'named'
           }
-          // dir: path.dirname(pkg.module),
-          // format: "es",
-          // name: pkg.name,
-          // exports: 'named',
-          // preserveModules: true, // 保留模块结构
-          // preserveModulesRoot: 'src' // 将保留的模块放在根级别的此路径下
-        }
+        ]
       }
     }
   }
