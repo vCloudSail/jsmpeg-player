@@ -69,8 +69,7 @@
   },
   "peerDependencies": {
     "core-js": "^3.0.0",
-    "element-ui": "^2.15.6",
-    "vue": "^2.7.0"
+    "vue": "^2.6.0"
   },
   "browserslist": [
     "> 1%",
