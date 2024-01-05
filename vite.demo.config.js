@@ -25,6 +25,7 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
 
   return {
     base: './',
+    publicDir: './demo/public',
     server: {
       // 配置为0.0.0.0，vite会自动监听当前机器的所有ip地址，这样就可以通过局域网访问了
       host: '0.0.0.0',
@@ -79,44 +80,20 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
     ],
     build: {
       // #region terser
-      // minify: 'terser',
-      // terserOptions: {
-      //   compress: {
-      //     drop_console: false,
-      //     drop_debugger: true,
-      //     pure_funcs: [
-      //       'console.log',
-      //       'console.dir',
-      //       'console.time',
-      //       'console.timeEnd'
-      //     ]
-      //   }
-      // },
-      // #endregion
-      lib: {
-        entry: './src/index.js',
-        name: libName,
-        formats: ['cjs', 'es', 'umd'],
-        fileName: 'index'
-      },
-      rollupOptions: {
-        external: [
-          // 'element-ui',
-          'vue'
-        ],
-        output: {
-          globals: {
-            // 'element-ui': 'ELEMENT',
-            vue: 'Vue'
-          }
-          // dir: path.dirname(pkg.module),
-          // format: "es",
-          // name: pkg.name,
-          // exports: 'named',
-          // preserveModules: true, // 保留模块结构
-          // preserveModulesRoot: 'src' // 将保留的模块放在根级别的此路径下
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: false,
+          drop_debugger: true,
+          pure_funcs: [
+            'console.log',
+            'console.dir',
+            'console.time',
+            'console.timeEnd'
+          ]
         }
       }
+      // #endregion
     }
   }
 })

@@ -12,8 +12,12 @@
   - 存在性能瓶颈，本组件可能不适用于大型项目
   - 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
 - 交流QQ群：56370082（请备注来源）
-- ```[v1.2.0]``` jsmpeg.js已迁移到独立仓库中，以git子模块的形式引入，初次拉取仓库时请使用```git clone --recursive```
-  
+
+### Note
+```[v1.2.0]``` jsmpeg.js已迁移到独立仓库中，以git子模块的形式引入
+- 初次拉取仓库时请使用 ```git clone --recursive```
+- 如果已经克隆了主仓库但没有克隆子模块，则使用 ```git submodule update --init --recursive```
+
 ### 支持的格式
 - 视频：mpeg1
 - 音频：mp2
@@ -263,31 +267,34 @@ export default {
 | tabindex      | number   | 起始的tabindex，给每个播放器加上tabindex，方便按下tab键切换 |
 | playerProps   | object   | 播放器选项，透传给单个播放器                                |
 
-#### 事件 & Emits：                                                  
+#### 事件 & Emits                                                 
 | 名称            | 参数                                                                            | 说明                          |
 | --------------- | ------------------------------------------------------------------------------- | ----------------------------- |
 | player-click    | {data:object,intance:Vue,index:number}                                          | 点击播放器时触发              |
 | player-noSignal | {data:object,intance:Vue,index:number}                                          | loading插槽，可自定义加载效果 |
 | player-swap     | {sourcePlayer:object,sourceIndex:number,targetPlayer:object,targetIndex:number} | 当两个播放器拖拽交换时触发    |
 
-#### 插槽 & Slot:
+#### 插槽 & Slot
 | 名称 | 参数 | 说明 |
 | ---- | ---- | ---- |
+| -    | -    | -    |
 
 
 #### 从外部拖入一个播放器
 要实现此功能，只需要在目标元素的drag-out事件中调用dataTransfer.setData方法即可
 ```js
-let dt = ev.dataTransfer
-ev.dataTransfer.effectAllowed = 'copy'
-dt.setData(
-  'text/plain',
-  JSON.stringify({
-    id: '', // 非必传
-    title: '',
-    url: '',
-  })
-)
+function handleDragOut(ev) {
+  let dt = ev.dataTransfer
+  ev.dataTransfer.effectAllowed = 'copy'
+  dt.setData(
+   'text/plain',
+   JSON.stringify({
+     id: '', // 非必传
+      title: '',
+      url: '',
+   })
+  )
+}
 ```
 
 ## 功能 & 计划
@@ -338,18 +345,19 @@ dt.setData(
 ## 服务端
 参考[JSMpegServer文档](./server/README.md)
 
-## 运行DEMO
+关于ffmpeg拉取桌面流见此文章：https://waitwut.info/blog/2013/06/09/desktop-streaming-with-ffmpeg-for-lower-latency/
 
-1. 拉取git仓库
+
+## 开发/运行DEMO
+
+1. 克隆仓库，```git clone --recursive https://github.com/vCloudSail/jsmpeg-player```
 2. 安装依赖包，运行cmd: npm i
 3. 启动服务端，运行cmd: npm run server (如果使用vscode，建议通过vscode启动)
 4. 启动DEMO客户端，运行cmd: npm run dev
 5. 查看demo
 
-
-ffmpeg拉取桌面流见此文章：https://waitwut.info/blog/2013/06/09/desktop-streaming-with-ffmpeg-for-lower-latency/
-
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f977c4e6f0434e03a0eb8ea287b55e23.png)
+
 
 ## 参与贡献
 1. Fork 本仓库

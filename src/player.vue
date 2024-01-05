@@ -358,6 +358,11 @@ export default {
         contianer: this.$refs['player-main'],
         ...this.options
       })
+
+      if (this.inBackground) {
+        this.intoBackground()
+      }
+
       this.$emit('player-loaded', player)
       let events = Object.keys(this.$listeners)
 
@@ -538,6 +543,7 @@ export default {
      * 切换播放模式
      */
     togglePlay() {
+      debugger
       if (this.paused) {
         this.play()
       } else {
