@@ -71,7 +71,6 @@ Vue.use(JSMpegPlayer)
 // 或者
 
 import { JSMpegPlayer, JSMpegMultipathPlayer } from 'vue-jsmpeg-player';
-import 'vue-jsmpeg-player/dist/style.css';
 
 Vue.component(JSMpegPlayer.name, JSMpegPlayer)
 Vue.component(JSMpegMultipathPlayer.name, JSMpegMultipathPlayer)
@@ -80,13 +79,15 @@ Vue.component(JSMpegMultipathPlayer.name, JSMpegMultipathPlayer)
 **局部组件**
 ```javascript
 import { JSMpegPlayer, JSMpegMultipathPlayer } from 'vue-jsmpeg-player';
-import 'vue-jsmpeg-player/dist/style.css';
 
 export default {
   ...
 
-  components: { [JSMpegPlayer.name]: JSMpegPlayer, [JSMpegMultipathPlayer.name]: JSMpegMultipathPlayer },
-
+  components: {
+    [JSMpegPlayer.name]: JSMpegPlayer,
+    [JSMpegMultipathPlayer.name]: JSMpegMultipathPlayer 
+  },
+  
   ...
 }
 

@@ -11,6 +11,7 @@ import vue2Jsx from '@vitejs/plugin-vue2-jsx'
 
 import Components from 'unplugin-vue-components/vite'
 import { ElementUiResolver } from 'unplugin-vue-components/resolvers'
+import libCss from 'vite-plugin-libcss'
 
 import pkg from './package.json'
 
@@ -22,7 +23,7 @@ const libName = 'vue-jsmpeg-player'
 
 export default defineConfig(({ mode, ssrBuild, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  console.log(mode)
+
   return {
     base: './',
     resolve: {
@@ -48,6 +49,8 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
       vue2(),
       vue2Jsx(),
 
+      libCss(),
+
       viteRequireTransform({
         fileRegex: /^(?!.*node_modules).*\.(js|jsx|vue|ts|tsx)$/
       }),
@@ -56,7 +59,7 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
       rollupVisualizer({
         emitFile: false,
         filename: 'report.html', //分析图生成的文件名
-        open: true //如果存在本地服务端口，将在打包后自动展示
+        open: false //如果存在本地服务端口，将在打包后自动展示
       })
     ],
     build: {
