@@ -1,8 +1,11 @@
 {
   "name": "vue-jsmpeg-player",
-  "version": "1.2.1",
+  "version": "dev",
   "description": "基于jsmpeg.js二次开发的流媒体播放器",
-  "private": false,
+  "private": true,
+  "workspaces": [
+    "./"
+  ],
   "author": "云帆 <cloudsail.studio@outlook.com>",
   "license": "MIT",
   "files": [
