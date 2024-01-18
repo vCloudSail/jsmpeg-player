@@ -113,7 +113,7 @@ const defaultOptions = () => ({
   /** 流媒体时，以秒为单位的最大排队音频长度。（可以理解为能接受的最大音画不同步时间） */
   maxAudioLag: 0.25,
   /** 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。 */
-  videoBufferSize: 512 * 1024,
+  videoBufferSize: 10 * 1024 * 1024,
   /** 流媒体时，音频解码缓冲区的字节大小。默认的128 * 1024 (128 kb)。对于非常高的比特率，您可能需要增加此值。 */
   audioBufferSize: 128 * 1024
 })
@@ -171,13 +171,13 @@ export default {
       player: this
     }
   },
-  emits: [
-    'no-signal',
-    'muted',
-    'close',
-    'volume-change',
-    'update:inBackground'
-  ],
+  // emits: [
+  //   'no-signal',
+  //   'muted',
+  //   'close',
+  //   'volume-change',
+  //   'update:inBackground'
+  // ],
   // #endregion
 
   // #region 数据相关
@@ -633,7 +633,7 @@ export default {
     },
     // #endregion
 
-    handleToolbar(cmd) {
+    handleToolbar(cmd, ...args) {
       if (!this.player) return
 
       switch (cmd) {
@@ -645,6 +645,9 @@ export default {
           break
         case 'mute':
           this.toggleMute()
+          break
+        case 'rotate':
+          this.rotate(...args)
           break
         case 'snapshot':
           this.snapshot()

@@ -6,9 +6,7 @@
     <button
       class="toolbar-item play-btn"
       type="button"
-      :class="
-        player.paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'
-      "
+      :class="player.paused ? 'jm-icon-video-play is-paused' : 'jm-icon-video-pause'"
       :title="player?.paused ? '播放' : '暂停'"
       @click="handleToolbar('play')"
     ></button>
@@ -61,11 +59,7 @@
     <button
       class="toolbar-item fullscreen-btn"
       type="button"
-      :class="
-        player.playerStatus.fullscreen
-          ? 'jm-icon-fullscreen-exit'
-          : 'jm-icon-fullscreen'
-      "
+      :class="player.playerStatus.fullscreen ? 'jm-icon-fullscreen-exit' : 'jm-icon-fullscreen'"
       :title="player.playerStatus.fullscreen ? '取消全屏' : '全屏'"
       @click="handleToolbar('fullscreen')"
     ></button>
@@ -120,13 +114,13 @@
               class="toolbar-item jm-icon-rotate-left"
               title="向左旋转90度"
               type="button"
-              @click="rotate(-90, true)"
+              @click="handleToolbar('rotate', -90, true)"
             ></button>
             <button
               class="toolbar-item jm-icon-rotate-right"
               title="向右旋转90度"
               type="button"
-              @click="rotate(90, true)"
+              @click="handleToolbar('rotate', 90, true)"
             ></button>
           </div>
         </div>
@@ -216,8 +210,8 @@ export default {
   // #endregion
 
   methods: {
-    handleToolbar(cmd, data) {
-      this.$emit('command', cmd, data)
+    handleToolbar(cmd, ...data) {
+      this.$emit('command', cmd, ...data)
     }
   }
 }

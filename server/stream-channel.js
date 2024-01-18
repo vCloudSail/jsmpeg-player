@@ -212,7 +212,7 @@ class StreamChannel {
         '-s',
         this.ffmpegOptions.outputResolution || '1920x1080', // 输出分辨率
         '-b:v',
-        this.ffmpegOptions.outputBitrate || '1500k', // 视频码率
+        this.ffmpegOptions.outputBitrate || '1000k', // 视频码率
         '-codec:a', // 音频编码器
         'mp2',
         '-ar', // 音频采样率

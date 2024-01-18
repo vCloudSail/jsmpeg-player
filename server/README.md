@@ -12,7 +12,7 @@
 ## 运行
 安装依赖
 
-(PS：如果安装ws模块后还是出现找不到ws模块的错误，请检查环境变量是否配置正确)
+(PS：如果安装ws模块后还是出现找不到ws模块的错误，请检查npm环境变量是否配置正确)
 ```
 npm i ws -g
 ```
@@ -26,18 +26,25 @@ node server/index.js <stream-port> <websocket-port>
 node server/index.js 18081 18082
 ```
 
-## Http接流服务
+## HttpServer - 接流服务
 
-URL(用于ffmpeg推流): http://127.0.0.1:{stream-port}/{通道名称}
+### URL (用于接收ffmpeg推流)
+
+- http://[ip]:[websocket-port]/${channelName}
 
 ### 参数
 - channelName（通道名称）：使用http第一子路径作为通道名称
 
-## WebSocket服务
 
-URL: ws://127.0.0.1:{websocket-port}/{通道名称}
+
+## WebSocketServer - 转发服务
+
+### URL
+
+- ws://[ip]:[websocket-port]/${channelName}?${query}
 
 注意：使用websocket第一个子路径作为通道名称，可带参数（仅使用第一次连接的客户端所带的参数，后续连接的客户端所带的参数无效）
+
 ### 参数
 | 名称       | 类型   | 说明                                                                     |
 | ---------- | ------ | ------------------------------------------------------------------------ |

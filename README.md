@@ -6,10 +6,10 @@
 - web播放实时视频流的几种方案对比，详见[此处](https://blog.csdn.net/a843334549/article/details/117319350)
 - 本方案详细介绍：[在Web中低时延播放RTSP视频流（海康、大华）方案 - JSMpeg.js](https://blog.csdn.net/a843334549/article/details/120697574)
 - jsmpeg.js相关链接：[gitee](https://gitee.com/mirrors/jsmpeg)、[github](https://github.com/phoboslab/jsmpeg)、[官网](https://jsmpeg.com/)
-- **关于延迟问题**：仅在局域网\本机下实测1s左右，在公网下未知，公网要考虑的东西太多(带宽、丢包、流量)，公网下的流媒体服务框架这里推荐[ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit)
+- **关于延迟问题**：仅在局域网\本机下实测1s左右，在公网下未知，公网要考虑的东西太多(带宽、丢包、流量)，公网下的流媒体服务框架这里推荐[ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit)、[SRS](https://github.com/ossrs/srs)
 - **关于性能问题**
-  - jsmpeg采用软解码方式，对客户端硬件有一定的性能要求，后续有空会做一下性能测试
-  - 存在性能瓶颈，本组件可能不适用于大型项目
+  - **注意：本方案存在性能瓶颈，可能不适用于大型项目，对性能有追求的请使用开源流媒体框架ZLMediaKit、SRS**
+  - 由于是客户端软解码，所以性能不会太好，在目前的i5 10代+8g这种配置机器上单个页面六路同屏应该是没问题的，再多就不行了，对性能有追求的只能用webrtc了，具体性能对比可见[jsmpeg官网性能对比](https://jsmpeg.com/perf.html)
   - 在使用vue开发环境时，可能会产生内存溢出的错误，应该是由于频繁热更新导致的，刷新页面即可
 - 交流QQ群：56370082（请备注来源）
 
@@ -18,9 +18,13 @@
 - 初次拉取仓库时请使用 ```git clone --recursive```
 - 如果已经克隆了主仓库但没有克隆子模块，则使用 ```git submodule update --init --recursive```
 
+
 ### 支持的格式
 - 视频：mpeg1
 - 音频：mp2
+
+ **仅支持mpeg1格式视频、mp2格式音频！！！仅支持mpeg1格式视频、mp2格式音频！！！仅支持mpeg1格式视频、mp2格式音频！！！不要随便拿个websocket流去给jsmpeg使用，播放不了的！！！也无法直接播放rtmp流！！！**
+
 
 ### 组件仓库/npm地址
 - [giee](https://gitee.com/vCloudsail/jsmpeg-player)
@@ -205,7 +209,7 @@ export default {
 | chunkSize             | number            | 使用时，以字节为单位加载的块大小。默认(1 mb)1024*1024                                                                                  |
 | decodeFirstFrame      | boolean           | 是否解码并显示视频的第一帧，一般用于设置画布大小以及使用初始帧作为"poster"图像。当使用自动播放或流媒体资源时，此参数不受影响。默认true |
 | maxAudioLag           | number            | 流媒体时，以秒为单位的最大排队音频长度（可以理解为能接受的最大音画不同步时间）。                                                       |
-| videoBufferSize       | number            | 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。                                |
+| videoBufferSize       | number            | 流媒体时，视频解码缓冲区的字节大小。默认的 4 * 1024 * 1024 (4MB)。对于非常高的比特率，您可能需要增加此值。                                |
 | audioBufferSize       | number            | 流媒体时，音频解码缓冲区的字节大小。默认的128 * 1024 (128 kb)。对于非常高的比特率，您可能需要增加此值。                                |
 
 #### 事件 & Emits
