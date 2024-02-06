@@ -1,11 +1,9 @@
 # JSMpeg-Server
 ## 介绍
 
-本服务基于nodejs开发，参考原jsmpeg仓库[websocket-relay.js](https://github.com/phoboslab/jsmpeg/blob/master/websocket-relay.js)的代码，支持多通道多路推流
-- 通过child_process库的span方法启动\管理ffmpeg命令行进程进行转码推流
-- 通过ws模块启动websocket服务
-- 通过http模块启动http接流服务
-- 以websocket、http的子路径作为推流通道名称
+本服务基于nodejs开发，参考原jsmpeg仓库[websocket-relay.js](https://github.com/phoboslab/jsmpeg/blob/master/websocket-relay.js)以及[node-rtsp-stream](https://github.com/kyriesent/node-rtsp-stream)仓库的代码，支持多通道多路推流
+- 通过child_process库的spawn方法启动\管理ffmpeg命令行进程进行转码推流、接收推流数据
+- 通过ws模块启动websocket服务，将流数据转发给各个客户端
 
 **注意：本服务仅作为Demo服务使用，仅供参考，未经过正式测试，可能存在诸多BUG，不建议用于生产环境**
 
@@ -20,13 +18,13 @@ npm i ws -g
 
 启动服务
 ```shell
-node server/index.js <stream-port> <websocket-port>
+node server/index.js <websocket-port>
 
 # e.g.
-node server/index.js 18081 18082
+node server/index.js 18082
 ```
 
-## HttpServer - 接流服务
+## ~~HttpServer - 接流服务 (已废弃)~~
 
 ### URL (用于接收ffmpeg推流)
 
@@ -56,7 +54,7 @@ node server/index.js 18081 18082
 
 ## 推流通道
 
-推流通道的作用是把http-server某个通道收到的流数据转发给各个websocket客户端，存在以下逻辑
+推流通道的作用是把接收到的流数据转发给各个websocket客户端，存在以下逻辑
 
 - 强制帧率为24fps，因为mpeg1/2不支持过低的帧率（原因自行百度，帧率过低会导致ffmpeg报错）
 - 当第一个客户端接入时，创建推流通道，以此客户端传递的参数作为主参数
@@ -69,7 +67,7 @@ node server/index.js 18081 18082
 
 
 ### 推流流程
-流媒体源=>ffmpeg转码推送=>http server接流=>websocket server推流=>websocket client接流(jsmpeg客户端)
+流媒体源=>ffmpeg转码=>websocket server推流=>websocket client接流(jsmpeg客户端)
 
 
 ### 桌面流通道

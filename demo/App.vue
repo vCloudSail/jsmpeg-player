@@ -112,7 +112,17 @@ export default {
           id: '伊拉克',
           title: '伊拉克 Al Sharqiya 电视台',
           url: "ws://localhost:18082/ylk?source=rtmp://ns8.indexforce.com/home/mystream&bitrate=1M"
-        }
+        },
+        // {
+        //   id: 'test1',
+        //   title: 'test1',
+        //   url: "ws://localhost:18082/test1?source=rtsp://admin:tsk1.com@111.198.72.247:8008/h264/ch33/sub/av_stream"
+        // },
+        // {
+        //   id: 'test2',
+        //   title: 'test2',
+        //   url: "ws://localhost:18082/test2?source=rtsp://admin:tsk1.com@111.198.72.247:8008/h264/ch34/sub/av_stream"
+        // }
       ]
     }
   },

@@ -1,25 +1,19 @@
-// Use the websocket-relay to serve a raw MPEG-TS over WebSockets. You can use
-// ffmpeg to feed the relay. ffmpeg -> websocket-relay -> browser
-// Example:
-// node websocket-relay yoursecret 8081 8082
-// ffmpeg -i <some input> -f mpegts http://localhost:8081/yoursecret
-
 const fs = require('fs'),
   http = require('http'),
   WebSocket = require('ws'),
   os = require('os')
 const StreamChannel = require('./stream-channel')
 
-if (process.argv.length < 2) {
+if (process.argv.length < 1) {
   console.log(
-    'Usage: \n' + 'node jsmpeg-server.js [<stream-port> <websocket-port>]'
+    'Usage: \n' + 'node index.js [<websocket-port>]'
   )
   process.exit()
 }
 
 const options = {
-  streamPort: process.argv[2] || 18081,
-  websocketPort: process.argv[3] || 18082,
+  // streamPort: process.argv[2] || 18081,
+  websocketPort: process.argv[2] || 18082,
   recordStream: false
 }
 
@@ -88,47 +82,47 @@ socketServer.broadcast = function (data) {
 }
 
 // HTTP Server to accept incomming MPEG-TS Stream from ffmpeg
-const streamServer = http.createServer(function (request, response) {
-  const params = request.url.split('/')
-  const channelName = params[1]
+// const streamServer = http.createServer(function (request, response) {
+//   const params = request.url.split('/')
+//   const channelName = params[1]
 
-  console.log(
-    `推流端接入(${channelName}): ` +
-      request.socket.remoteAddress +
-      ':' +
-      request.socket.remotePort +
-      '\n'
-  )
-  if (!streamChannelMap.has(channelName)) {
-    // console.log(
-    //   `推流端被强制终止(${request.socket.remoteAddress}:${request.socket.remotePort}) - 不存在此通道[${channelName}].\n`
-    // )
-    // response.end()
-    return
-  }
+//   console.log(
+//     `推流端接入(${channelName}): ` +
+//       request.socket.remoteAddress +
+//       ':' +
+//       request.socket.remotePort +
+//       '\n'
+//   )
+//   if (!streamChannelMap.has(channelName)) {
+//     // console.log(
+//     //   `推流端被强制终止(${request.socket.remoteAddress}:${request.socket.remotePort}) - 不存在此通道[${channelName}].\n`
+//     // )
+//     // response.end()
+//     return
+//   }
 
-  streamChannelMap.get(channelName).acceptIncomingMessage(request)
+//   streamChannelMap.get(channelName).acceptIncomingMessage(request)
 
-  response.connection.setTimeout(0)
-  // request.on('data', function (data) {
-  //   // socketServer.broadcast(data)
-  //   if (request.socket.recording) {
-  //     request.socket.recording.write(data)
-  //   }
-  // })
-  // request.on('end', function () {
-  //   console.log('close')
-  //   if (request.socket.recording) {
-  //     request.socket.recording.close()
-  //   }
-  // })
+//   response.connection.setTimeout(0)
+//   // request.on('data', function (data) {
+//   //   // socketServer.broadcast(data)
+//   //   if (request.socket.recording) {
+//   //     request.socket.recording.write(data)
+//   //   }
+//   // })
+//   // request.on('end', function () {
+//   //   console.log('close')
+//   //   if (request.socket.recording) {
+//   //     request.socket.recording.close()
+//   //   }
+//   // })
 
-  // Record the stream to a local file?
-  // if (options.recordStream) {
-  //   const path = 'recordings/' + Date.now() + '.ts'
-  //   request.socket.recording = fs.createWriteStream(path)
-  // }
-})
+//   // Record the stream to a local file?
+//   // if (options.recordStream) {
+//   //   const path = 'recordings/' + Date.now() + '.ts'
+//   //   request.socket.recording = fs.createWriteStream(path)
+//   // }
+// })
 
 const ipList = []
 const networkInterfaces = os.networkInterfaces()
@@ -137,19 +131,19 @@ Object.entries(networkInterfaces).forEach((value) => {
   ipList.push(ip.address)
 })
 
-console.log(
-  `Http Server(ffmpeg 推流地址): \r\n  ${ipList
-    .map((ip) => `http://${ip}:${options.streamPort}/{channelName}`)
-    .join('\r\n  ')}`
-)
+// console.log(
+//   `Http Server(ffmpeg 推流地址): \r\n  ${ipList
+//     .map((ip) => `http://${ip}:${options.streamPort}/{channelName}`)
+//     .join('\r\n  ')}`
+// )
 console.log(
   `WebSocket Server(jsmpeg客户端连接地址): \r\n  ${ipList
     .map(
       (ip) =>
-        `ws://${ip}:${options.streamPort}/{channelName}?source={sourceUrl}`
+        `ws://${ip}:${options.websocketPort}/{channelName}?source={sourceUrl}`
     )
     .join('\r\n  ')}`
 )
 
-streamServer.headersTimeout = 0
-streamServer.listen(options.streamPort)
+// streamServer.headersTimeout = 0
+// streamServer.listen(options.streamPort)

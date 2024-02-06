@@ -33,7 +33,7 @@
 
 ## 方案架构
 
-**rtsp流 => ffmpeg转码 => http server接收 => websocket server转发 => websocket client => 客户端软解码渲染**
+**rtsp流 => ffmpeg转码 => ~~http server接收~~(已废弃，直接通过命令行获取转码数据) => websocket server转发 => websocket client => 客户端软解码渲染**
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2a11509af2b64ee08608518017a7bfad.png)
 
