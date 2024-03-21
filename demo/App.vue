@@ -190,7 +190,6 @@ body {
     display: flex;
     overflow: hidden;
     .jsmpeg-player {
-      flex: 1;
       width: auto;
     }
     .el-tabs__content {

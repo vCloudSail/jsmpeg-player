@@ -9,14 +9,17 @@
     "dist",
     "index.d.ts"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "workspaces": [
+    "."
+  ],
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.esm.js",
   "types": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.umd.js"
     },
     "./dist/style.css": "./dist/style.css",
     "./style.css": "./dist/style.css"

@@ -11,7 +11,7 @@ import vue2Jsx from '@vitejs/plugin-vue2-jsx'
 
 import Components from 'unplugin-vue-components/vite'
 import { ElementUiResolver } from 'unplugin-vue-components/resolvers'
-import libCss from 'vite-plugin-libcss'
+import viteLibCss from 'vite-plugin-libcss'
 
 import pkg from './package.json'
 
@@ -49,7 +49,7 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
       vue2(),
       vue2Jsx(),
 
-      libCss(),
+      viteLibCss(),
 
       viteRequireTransform({
         fileRegex: /^(?!.*node_modules).*\.(js|jsx|vue|ts|tsx)$/
@@ -67,14 +67,10 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
       minify: 'terser',
       terserOptions: {
         compress: {
+          dead_code: true,
           drop_console: false,
           drop_debugger: true,
-          pure_funcs: [
-            'console.log',
-            'console.dir',
-            'console.time',
-            'console.timeEnd'
-          ]
+          pure_funcs: ['console.log', 'console.dir', 'console.time', 'console.timeEnd']
         }
       },
       // #endregion
@@ -91,30 +87,28 @@ export default defineConfig(({ mode, ssrBuild, command }) => {
         output: [
           {
             globals: {
-              // 'element-ui': 'ELEMENT',
               vue: 'Vue'
             },
-            format: 'es'
+            format: 'esm'
             // preserveModules: true, // 保留模块结构
             // preserveModulesRoot: 'src' // 将保留的模块放在根级别的此路径下
           },
           {
             globals: {
-              // 'element-ui': 'ELEMENT',
               vue: 'Vue'
             },
             format: 'umd',
             name: libName,
             exports: 'named'
-          },
-          {
-            globals: {
-              // 'element-ui': 'ELEMENT',
-              vue: 'Vue'
-            },
-            format: 'cjs',
-            exports: 'named'
           }
+          // {
+          //   globals: {
+          //     // 'element-ui': 'ELEMENT',
+          //     vue: 'Vue'
+          //   },
+          //   format: 'cjs',
+          //   exports: 'named'
+          // }
         ]
       }
     }

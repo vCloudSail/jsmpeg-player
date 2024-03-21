@@ -14,8 +14,8 @@ class StreamChannel {
   source = ''
   /** 最多连接多少客户端 */
   maxClient = 30
-  /** 接流超时时间，默认15秒 */
-  timeout = 15
+  /** 接流超时时间，默认30秒 */
+  timeout = 30
   /** @type {ChildProcess} */
   ffmpeProcess = null
 
@@ -43,7 +43,7 @@ class StreamChannel {
   constructor({ name, source = '', maxClient, timeout, ffmpegOptions, serverOptions } = {}) {
     this.name = name
     this.source = source?.trim() || ''
-    this.timeout = timeout || 60
+    this.timeout = timeout || 30
     this.maxClient = maxClient || -1
     this.ffmpegOptions.outputBitrate = ffmpegOptions?.bitrate || '1500K'
     this.ffmpegOptions.outputResolution = ffmpegOptions?.resolution || '1920x1080'

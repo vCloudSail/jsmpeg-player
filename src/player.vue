@@ -58,14 +58,18 @@
       </div>
       <!-- <canvas class="jsmpeg-canvas"
               ref="canvas" /> -->
-      <template v-if="!loading && playerStatus.noSignal">
+
+      <div
+        class="no-signal-mask"
+        v-if="!loading && playerStatus.noSignal"
+      >
         <template v-if="$slots['no-signal']">
           <slot name="no-signal" />
         </template>
         <template v-else>
           <div class="no-signal-text"> {{ noSignalText }} </div>
         </template>
-      </template>
+      </div>
     </div>
     <player-toolbar
       v-if="withToolbar"
@@ -85,39 +89,6 @@ import Loading from './components/loading.vue'
 import PlayerToolbar from './components/toolbar.vue'
 // import Contextmenu from './components/contextmenu.vue'
 
-const defaultOptions = () => ({
-  /** 是否循环播放视频(仅静态文件)。默认true */
-  autoplay: true,
-  /** 是否解码音频。默认true */
-  audio: true,
-  /** 是否解码视频。默认true */
-  video: true,
-  /** 预览图像的URL，用来在视频播放之前作为海报显示。 */
-  poster: null,
-  /** 是否禁用后台播放，当web页面处于非活动状态时是否暂停播放，默认true（注意，浏览器通常会在非活动标签中限制JS） */
-  pauseWhenHidden: true,
-  /** 是否禁用WebGL，始终使用Canvas2D渲染器。默认false */
-  disableGl: false,
-  /** 是否禁用WebAssembly并始终使用JavaScript解码器。默认false */
-  disableWebAssembly: false,
-  /** WebGL上下文是否创建必要的“截图”。默认false */
-  preserveDrawingBuffer: true,
-  /** 是否以块的形式加载数据(仅静态文件)。当启用时，回放可以在完整加载源之前开始，默认true */
-  progressive: true,
-  /** 当不需要回放时是否推迟加载块。默认=progressive */
-  throttled: true,
-  /** 使用时，以字节为单位加载的块大小。默认(1 mb)1024*1024 */
-  chunkSize: 1024 * 1024,
-  /** 是否解码并显示视频的第一帧，一般用于设置画布大小以及使用初始帧作为"poster"图像。当使用自动播放或流媒体资源时，此参数不受影响。默认true */
-  decodeFirstFrame: true,
-  /** 流媒体时，以秒为单位的最大排队音频长度。（可以理解为能接受的最大音画不同步时间） */
-  maxAudioLag: 0.25,
-  /** 流媒体时，视频解码缓冲区的字节大小。默认的512 * 1024 (512 kb)。对于非常高的比特率，您可能需要增加此值。 */
-  videoBufferSize: 10 * 1024 * 1024,
-  /** 流媒体时，音频解码缓冲区的字节大小。默认的128 * 1024 (128 kb)。对于非常高的比特率，您可能需要增加此值。 */
-  audioBufferSize: 128 * 1024
-})
-
 export default {
   name: 'jsmpeg-player',
   inheritAttrs: false,
@@ -128,7 +99,7 @@ export default {
     title: String,
     options: {
       type: Object,
-      default: defaultOptions
+      default: () => ({})
     },
     /** 是否可关闭（单击关闭按钮，仅抛出事件） */
     closeable: Boolean,
@@ -171,13 +142,7 @@ export default {
       player: this
     }
   },
-  // emits: [
-  //   'no-signal',
-  //   'muted',
-  //   'close',
-  //   'volume-change',
-  //   'update:inBackground'
-  // ],
+  emits: ['no-signal', 'muted', 'close', 'volume-change', 'update:inBackground'],
   // #endregion
 
   // #region 数据相关
@@ -218,7 +183,22 @@ export default {
         autoStretch: false
       },
       timers: {
-        noSignal: null,
+        noSignal: {
+          start(cb) {
+            if (this.timer) return
+
+            this.timer = setTimeout(cb, 15000)
+          },
+          restart(cb) {
+            clearTimeout(this.timer)
+            this.timers.noSignal = setTimeout(cb, 15000)
+          },
+          stop() {
+            clearTimeout(this.timer)
+            this.timer = null
+          },
+          timer: null
+        },
         canvasMouseMove: null
       }
     }
@@ -288,18 +268,17 @@ export default {
       //   this.initPlayer()
       // }
       this.player?.destroy()
+      this.player = null
 
-      if (this.url == null || this.url == '') {
-        this.player = null
-      } else {
-        this.initPlayer()
+      if (this.url != null && this.url !== '') {
+        this.play()
       }
     },
     options: {
       deep: true,
       handler() {
         this.destroyPlayer()
-        this.initPlayer()
+        this.play()
       }
     },
     inBackground(nval) {
@@ -318,7 +297,10 @@ export default {
       this.rootTabs.$on('tab-click', (tab) => {
         try {
           // 处理el-tabs切换标签时，进入后台播放
-          if (!tab.$el?.contains(this.$el)) {
+          if (tab.$el?.contains(this.$el)) {
+            this.intoFront()
+            this.$emit('update:inBackground', false)
+          } else {
             this.intoBackground()
             this.$emit('update:inBackground', true)
           }
@@ -329,7 +311,7 @@ export default {
       this.destroyPlayer()
     })
 
-    this.init()
+    this.play()
 
     this.syncTimer = setInterval(() => {
       if (this.player) {
@@ -413,8 +395,8 @@ export default {
 
         this.playerStatus.noSignal = false
         this.loading = false
-        clearTimeout(this.timers.noSignal)
-        this.timers.noSignal = null
+
+        this.timers.noSignal.stop()
       })
       // player.on('source-completed', () => {
       //   console.log('[JSMpegPlayer] 事件触发 -> 源播放完成')
@@ -460,30 +442,30 @@ export default {
       player.on('source-connected', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源连接')
 
-        clearTimeout(this.timers.noSignal)
-        this.loading = true
+        this.timers.noSignal.stop()
+
         this.playerStatus.noSignal = false
+        this.loading = true
       })
       player.on('source-interrupt', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源传输中断')
 
         this.loading = true
-        clearTimeout(this.timers.noSignal)
 
-        this.timers.noSignal = setTimeout(this.handleNoSignal, 15000)
+        this.timers.noSignal.start(this.handleNoSignal)
       })
       player.on('source-continue', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源传输恢复/继续')
 
-        clearTimeout(this.timers.noSignal)
-        this.timers.noSignal = null
+        this.timers.noSignal.stop()
+
         this.loading = false
         this.playerStatus.noSignal = false
       })
       player.on('source-closed', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源关闭')
 
-        clearTimeout(this.timers.noSignal)
+        this.timers.noSignal.stop()
         this.handleNoSignal()
       })
       // #endregion
@@ -495,8 +477,6 @@ export default {
       if (this.defaultMute) {
         this.volume = 0
       }
-
-      this.timers.noSignal = setTimeout(this.handleNoSignal, 15000)
 
       for (const key in this.playerSettings) {
         this.settingPlayer(key, this.playerSettings[key])
@@ -543,7 +523,6 @@ export default {
      * 切换播放模式
      */
     togglePlay() {
-      debugger
       if (this.paused) {
         this.play()
       } else {
@@ -558,6 +537,7 @@ export default {
         this.initPlayer()
       }
       this.player?.play()
+      this.timers.noSignal.start(this.handleNoSignal)
     },
     pause() {
       this.player?.pause()
@@ -661,6 +641,7 @@ export default {
       }
     },
     handleNoSignal() {
+      this.timers.noSignal.stop()
       this.playerStatus.noSignal = true
       this.loading = false
       this.stop()

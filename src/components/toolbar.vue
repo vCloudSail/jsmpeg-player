@@ -185,6 +185,7 @@ export default {
       default: null
     }
   },
+  emits: ['command'],
   // #endregion
 
   // #region 数据相关
