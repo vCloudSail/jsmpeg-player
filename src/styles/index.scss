@@ -2,6 +2,7 @@
 @import './popover.scss';
 @import './keyframes.scss';
 @import './flex.scss';
+@import './common.scss';
 
 .jsmpeg-player {
   position: relative;
@@ -40,6 +41,7 @@
     transition: 0.48s transform ease-in-out;
     z-index: 10;
     box-sizing: border-box;
+
 
     &.is-show {
       transform: translateY(0);
@@ -260,6 +262,30 @@
   .overlayers {
     width: 0;
     height: 0;
+  }
+
+  .performance-stats {
+    padding: 8px;
+    border-radius: 10px;
+    position: relative;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    color: black;
+    background: rgba(245, 245, 245, 0.9);
+    // mix-blend-mode: multiply !important;
+    // background-blend-mode: multiply;
+
+    .label {
+      width: 80px;
+      // text-align: right;
+      margin-right: 12px;
+    }
+
+    .value {
+      flex: 1;
+      text-align: center;
+    }
   }
 }
 

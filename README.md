@@ -226,8 +226,8 @@ export default {
 | volume-change | - | number | 当音量变化时触发 |
 | muted | - | number | 当静音时触发 |
 | **原生事件** |  | - | - |
-| video-decode | [onVideoDecode]() | decoder, time | 视频帧解码事件，当成功解码视频帧时触发 |
-| audio-decode | [onAudioDecode]() | decoder, time | 音频帧解码事件，当成功解码音频帧时触发 |
+| video-decode | [onVideoDecode]() | decoder, elapsedTime | 视频帧解码事件，当成功解码视频帧时触发 |
+| audio-decode | [onAudioDecode]() | decoder, elapsedTime | 音频帧解码事件，当成功解码音频帧时触发 |
 | play | [onPlay]() | player | 播放开始事件 |
 | pause | [onPause]() | player | 播放暂停事件 |
 | ended | [onEnded]() | player | 播放结束事件 |

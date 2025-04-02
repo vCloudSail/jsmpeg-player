@@ -1,0 +1,31 @@
+input[type="range"] {
+  width: auto;
+  border-radius: 10px;
+  background: linear-gradient(#059CFA, #059CFA) no-repeat !important;
+  color: #059CFA !important;
+  // appearance: none;
+
+  // &[orient="vertical"] {
+  //   height: 120px;
+  //   width: 24px;
+  //   padding: 0 8px;
+  //   box-shadow: 0 1px 1px #def3f8, inset 0 .125em .125em #0d1112;
+  // }
+
+  /*轨道内置阴影效果*/
+  /*这个属性设置使填充进度条时的图形为圆角*/
+  &::-webkit-slider-thumb {
+    // appearance: none;
+    height: 25px;
+    width: 25px;
+    margin-top: -5px;
+    /*使滑块超出轨道部分的偏移量相等*/
+    background: #ffffff;
+    border-radius: 50%;
+    /*外观设置为圆形*/
+    border: solid 0.125em rgba(205, 224, 230, 0.5);
+    /*设置边框*/
+    box-shadow: 0 .125em .125em #3b4547;
+    /*添加底部阴影*/
+  }
+}

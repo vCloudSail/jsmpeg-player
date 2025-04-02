@@ -141,23 +141,19 @@
         :visible-arrow="false"
         :append-to-body="false"
       >
-        <div class="volume-value">{{ volumePercent }}</div>
-        <el-slider
+        <div class="volume-value">{{ volumePercent }} %</div>
+        <input
+          class="volume-slider"
+          type="range"
+          orient="vertical"
           v-model="player.volume"
           vertical
           height="120px"
           :max="1"
           :min="0"
           :step="0.01"
-          :show-tooltip="false"
-          :marks="{
-            0: '',
-            0.5: '',
-            1: ''
-          }"
           @change="$emit('volume-change', player.volume)"
-        >
-        </el-slider>
+        />
       </el-popover>
     </div>
   </div>

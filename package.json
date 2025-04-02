@@ -9,9 +9,6 @@
     "dist",
     "index.d.ts"
   ],
-  "workspaces": [
-    "."
-  ],
   "main": "./dist/index.umd.js",
   "module": "./dist/index.esm.js",
   "types": "./index.d.ts",

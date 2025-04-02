@@ -5,7 +5,7 @@
     @mouseleave="handlePlayerMouseLeave"
   >
     <div
-      class="player-header"
+      class="player-header flex-row"
       :class="{ 'is-show': showTitle }"
     >
       <slot
@@ -69,6 +69,29 @@
         <template v-else>
           <div class="no-signal-text"> {{ noSignalText }} </div>
         </template>
+      </div>
+
+      <div class="performance-stats">
+        <div class="stats-item kBps flex">
+          <div class="label">速率</div>
+          <div class="value"> {{ this.playerStatus.kBps }} KB/s</div>
+        </div>
+        <div class="stats-item fps flex">
+          <div class="label">fps</div>
+          <div class="value"> {{ this.playerStatus.fps }} </div>
+        </div>
+        <div class="stats-item decode-delay flex-row">
+          <div class="label">解码延迟</div>
+          <div class="value"></div>
+        </div>
+        <div class="stats-item render-delay flex">
+          <div class="label">渲染延迟</div>
+          <div class="value"> </div>
+        </div>
+        <div class="stats-item delay flex">
+          <div class="label">延迟</div>
+          <div class="value">{{ this.playerStatus.delay }}</div>
+        </div>
       </div>
     </div>
     <player-toolbar
@@ -171,7 +194,9 @@ export default {
         recording: false,
         recordingDuration: 0,
         volume: 0,
-        paused: true
+        paused: true,
+        fps: 0,
+        kBps: 0
       },
       playerSettings: {
         disableGl: false,
@@ -191,7 +216,7 @@ export default {
           },
           restart(cb) {
             clearTimeout(this.timer)
-            this.timers.noSignal = setTimeout(cb, 15000)
+            this.timers = setTimeout(cb, 15000)
           },
           stop() {
             clearTimeout(this.timer)
@@ -368,6 +393,7 @@ export default {
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
         this.loading = false
+        this.timers.noSignal.stop()
       })
       player.on('pause', (arg) => {
         console.log('[JSMpegPlayer] 事件触发 -> 播放暂停')
@@ -375,6 +401,7 @@ export default {
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
         this.loading = false
+        this.timers.noSignal.stop()
         console.log('onPause')
       })
       player.on('stalled', () => {
@@ -389,6 +416,7 @@ export default {
         this.playerStatus.currentTime = player.currentTime
         this.playerStatus.playing = player.isPlaying
         this.playerStatus.paused = player.paused
+        this.timers.noSignal.stop()
       })
       player.on('source-established', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源通道建立')
@@ -451,8 +479,7 @@ export default {
         console.log('[JSMpegPlayer] 事件触发 -> 源传输中断')
 
         this.loading = true
-
-        this.timers.noSignal.start(this.handleNoSignal)
+        this.timers.noSignal.restart(this.handleNoSignal)
       })
       player.on('source-continue', () => {
         console.log('[JSMpegPlayer] 事件触发 -> 源传输恢复/继续')
@@ -469,6 +496,15 @@ export default {
         this.handleNoSignal()
       })
       // #endregion
+
+      player.on('performance-fps', (value) => {
+        this.playerStatus.delay = this.player.delay
+        this.playerStatus.fps = value
+      })
+      player.on('performance-kBps', (value) => {
+        this.playerStatus.delay = this.player.delay
+        this.playerStatus.kBps = value
+      })
 
       this.player = player
 
@@ -537,7 +573,7 @@ export default {
         this.initPlayer()
       }
       this.player?.play()
-      this.timers.noSignal.start(this.handleNoSignal)
+      // this.timers.noSignal.start(this.handleNoSignal)
     },
     pause() {
       this.player?.pause()
